@@ -17,7 +17,7 @@ import { FieldValue, serverTimestamp, Timestamp } from "firebase/firestore";
 import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
 import { db } from "@/configs/firebaseConfig";
 import ResponsiveTable from "@/components/Table/Table";
-import { Clientes, RepuestoCart, Repuestos } from "@/types";
+import { Cliente, RepuestoCart, Repuesto } from "@/types";
 import RepuestoDetail from "@/components/Details/Details";
 import { columnsCart, columnsVentas } from "@/components/Table/utils/columns";
 import ButtonGroupAgregar from "@/components/Buttons/ButtonGroupAgregar";
@@ -32,6 +32,7 @@ import { proccessSell } from "@/api/processSell";
 import LongBar from "@/components/LongBar/LongBar";
 import ClientForm from "@/components/ClientForm/ClientForm";
 import ClosableModal from "@/components/ClosableModal/ClosableModal";
+import { useSession } from "@/providers/Session";
 
 type RootStackParamList = {
   Ventas: { ventas?: boolean };
@@ -55,16 +56,16 @@ const VentasScreen: React.FC = ({}) => {
   // States
   const [nombre, setNombreFilter] = useState<string>("");
   const nameQuery = useDebounce(nombre);
-
+  const { user } = useSession();
   const [modelo, setModelo] = useState<string>("");
   const [linea, setLineaFilter] = useState<string>("");
   const [marca, setMarcaFilter] = useState<string>("");
   // const [modelo, setModeloFilter] = useState<number>(0);
-  const [searchResults, setSearchResults] = useState<Repuestos[]>([]);
+  const [searchResults, setSearchResults] = useState<Repuesto[]>([]);
   const [shopList, setShopList] = useState<RepuestoCart[]>([]);
-  const [clientData, setClientData] = useState<Clientes | null>(null);
+  const [clientData, setClientData] = useState<Cliente | null>(null);
   const [repuestoSeleccionado, setrepuestoSeleccionado] =
-    useState<Repuestos | null>(null);
+    useState<Repuesto | null>(null);
 
   const [showFooter, setShowFooter] = useState<boolean>(false);
 
@@ -99,7 +100,7 @@ const VentasScreen: React.FC = ({}) => {
 
   /** Shopping Cart Functions */
   const addToCartHandler = (
-    _repuesto?: Repuestos | null,
+    _repuesto?: Repuesto | null,
     descuento?: string
   ): void => {
     const repuesto = _repuesto || repuestoSeleccionado;
@@ -188,13 +189,12 @@ const VentasScreen: React.FC = ({}) => {
   /** Sales Functions */
 
   const processSale = async (isCredit: boolean = false): Promise<void> => {
-    if (isCredit && !clientData?.nit) {
-      console.log(
-        "Error",
-        "Debe agregar datos del cliente para dar al crédito"
-      );
+    console.log("clientData: ", clientData);
+    if (!clientData) {
+      console.log("Error", "Debe agregar datos del cliente");
       return;
     }
+
     console.log("clientData: ", clientData);
 
     if (shopList.length < 1) {
@@ -207,6 +207,7 @@ const VentasScreen: React.FC = ({}) => {
         total: total,
         nit: clientData?.nit,
         cliente: clientData,
+        vendedor: user,
       };
 
       const result = await proccessSell(db, shopList, ventaData);
@@ -226,7 +227,7 @@ const VentasScreen: React.FC = ({}) => {
     }
   };
 
-  const handleSelectItem = (item: Repuestos | null) => {
+  const handleSelectItem = (item: Repuesto | null) => {
     setrepuestoSeleccionado(item);
   };
 
@@ -236,15 +237,14 @@ const VentasScreen: React.FC = ({}) => {
     setShowFooter((p) => !p);
   };
 
-  const handleClientSelect = (cliente: Clientes): void => {
+  const handleClientSelect = (cliente: Cliente): void => {
     setClientData(cliente);
     setShowFooter(false);
   };
   console.log("clientData: ", clientData);
 
   return (
-    // @ts-ignore
-    <View style={{ display: "contents" }}>
+    <View style={{ flex: 1 }}>
       <View style={styles.container}>
         {/* Barra de busqueda y tabla de resultados */}
         <SearchBar
@@ -302,6 +302,7 @@ const VentasScreen: React.FC = ({}) => {
       <ClosableModal
         onClose={() => setClientModal(false)}
         visible={clientModal}
+        contentContainerStyle={{ width: "100%", maxWidth: 1200 }}
       >
         <ClientForm
           onSubmit={(cliente) => {

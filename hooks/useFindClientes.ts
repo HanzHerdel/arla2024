@@ -8,11 +8,11 @@ import {
   limit,
   onSnapshot,
 } from "firebase/firestore";
-import { Clientes } from "@/types";
+import { Cliente } from "@/types";
 import useDebounce from "./useDebounce";
 
 const useGetClientes = (nombre: string = "", nit: string | null = null) => {
-  const [clientes, setClientes] = useState<Clientes[]>([]);
+  const [clientes, setClientes] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,7 +40,7 @@ const useGetClientes = (nombre: string = "", nit: string | null = null) => {
         const fetchedClientes = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-        })) as Clientes[];
+        })) as Cliente[];
 
         setClientes(fetchedClientes);
         setLoading(false);

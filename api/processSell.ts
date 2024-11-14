@@ -1,4 +1,4 @@
-import { RepuestoCart } from "@/types";
+import { ItemVenta, RepuestoCart, Usuario } from "@/types";
 import {
   collection,
   doc,
@@ -16,6 +16,7 @@ export const proccessSell = async (
   db: Firestore,
   shopList: RepuestoCart[],
   ventaData: any
+  //usuario: Usuario
 ): Promise<boolean> => {
   try {
     const timestamp = serverTimestamp();
@@ -23,6 +24,7 @@ export const proccessSell = async (
       for (const actualizacion of shopList) {
         const repuestoRef = doc(db, "repuestos", actualizacion.id);
         const repuestoSnapshot = await transaction.get(repuestoRef);
+        console.log("repuestoSnapshot: ", repuestoSnapshot);
 
         if (!repuestoSnapshot.exists()) {
           throw new Error(`Repuesto con ID ${actualizacion.id} no existe`);
@@ -46,7 +48,7 @@ export const proccessSell = async (
         });
       }
 
-      const ventaItems = shopList.map((item) => ({
+      const ventaItems: ItemVenta[] = shopList.map((item) => ({
         item: item.id,
         unidades: item.cantidad,
         nombre: item.nombre,
@@ -59,6 +61,8 @@ export const proccessSell = async (
       }));
       ventaData.items = ventaItems;
       ventaData.fecha = timestamp;
+      console.log("ventaData: ", ventaData);
+      //ventaData.vendedor = usuario.id;
       // Agregar la venta
       const ventasRef = doc(collection(db, "ventas"));
       transaction.set(ventasRef, ventaData);

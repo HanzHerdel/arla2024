@@ -6,16 +6,14 @@ import {
   TouchableOpacity,
   TextInput,
 } from "react-native";
-import { FlashList } from "@shopify/flash-list";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { getCollectionData } from "@/api/getGenericCollection";
-import { db } from "@/configs/firebaseConfig";
-import { Clientes } from "@/types";
-import useFindClientes from "@/hooks/useFindClientes";
+import { Cliente } from "@/types";
+import useGetClientes from "@/hooks/useFindClientes";
+import { FlatList } from "react-native-gesture-handler";
 
 interface ClientsFinderProps {
-  onEdit?: (cliente: Clientes) => void;
-  onSelect?: (cliente: Clientes) => void;
+  onEdit?: (cliente: Cliente) => void;
+  onSelect?: (cliente: Cliente) => void;
   onNewClient?: () => void;
 }
 
@@ -26,9 +24,9 @@ const ClientsFinder: React.FC<ClientsFinderProps> = ({
 }) => {
   const [searchName, setSearchName] = useState("");
   const [searchNit, setSearchNit] = useState("");
-  const clientes = useFindClientes(searchName, searchNit);
+  const clientes = useGetClientes(searchName, searchNit);
 
-  const renderItem = ({ item }: { item: Clientes }) => (
+  const renderItem = ({ item }: { item: Cliente }) => (
     <View style={styles.clientCard}>
       <View style={styles.clientInfo}>
         <Text style={styles.clientName}>{item.nombre}</Text>
@@ -94,10 +92,9 @@ const ClientsFinder: React.FC<ClientsFinderProps> = ({
         </TouchableOpacity>
       </View>
 
-      <FlashList
+      <FlatList
         data={clientes}
         renderItem={(item) => renderItem(item)}
-        estimatedItemSize={120}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
       />

@@ -1,4 +1,4 @@
-import { Repuestos } from "@/types";
+import { Repuesto } from "@/types";
 import { CONECTORES } from "@/utils/constants";
 import {
   collection,
@@ -20,7 +20,7 @@ interface GetRepuestosVentas {
 export const getRepuestosVentas = async (
   db: Firestore,
   { marca, linea, nombre, estacion, modelo, limite = 32 }: GetRepuestosVentas
-): Promise<Repuestos[]> => {
+): Promise<Repuesto[]> => {
   try {
     const keyWords = nombre
       .split(" ")
@@ -31,10 +31,12 @@ export const getRepuestosVentas = async (
     const queryArray = [];
     marca && queryArray.push(where("marca", "==", marca));
     linea && queryArray.push(where("linea", "==", linea));
-    keyWords.forEach((keyWord) => {
-      queryArray.push(where("keyWords", "array-contains", keyWord));
-    });
-    queryArray.push(where("nombre", ">=", nombre));
+
+    if (keyWords.length)
+      queryArray.push(where("keyWords", "array-contains-any", keyWords));
+    /*     else {
+      queryArray.push(where("nombre", ">=", nombre));
+    } */
     if (modelo) {
       queryArray.push(where("compatibilidadInicial", "<=", modelo));
       queryArray.push(where("compatibilidadFinal", ">=", modelo));
@@ -51,10 +53,10 @@ export const getRepuestosVentas = async (
 
     // Obtener los documentos
     const snapshot = await getDocs(repQuery);
-    const fetchedRepuestos: Repuestos[] = snapshot.docs.map((doc) => ({
+    const fetchedRepuestos: Repuesto[] = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-    })) as Repuestos[];
+    })) as Repuesto[];
     return fetchedRepuestos;
   } catch (error) {
     console.error("Error fetching repuestos: ", error);

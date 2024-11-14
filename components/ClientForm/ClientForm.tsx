@@ -1,22 +1,20 @@
 import React from "react";
 import {
-  View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { useForm, Controller } from "react-hook-form";
-import TextField from "../Forms/TextField";
+import { useForm } from "react-hook-form";
+import TextField from "../Fields/TextField";
 import { db } from "@/configs/firebaseConfig";
 import { addCliente } from "@/api/addCliente";
-import { Clientes, New } from "@/types";
+import { Cliente, New } from "@/types";
 
 interface AddClientFormProps {
-  onSubmit: (formData: Clientes) => void;
+  onSubmit: (formData: Cliente) => void;
   action?: "ADD" | "UPDATE";
 }
 
@@ -28,7 +26,7 @@ const ClientForm: React.FC<AddClientFormProps> = ({
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<New<Clientes>>({
+  } = useForm<New<Cliente>>({
     defaultValues: {
       nombre: "",
       telefono: "",
@@ -39,7 +37,7 @@ const ClientForm: React.FC<AddClientFormProps> = ({
     },
   });
 
-  const onSubmitForm = async (data: New<Clientes>) => {
+  const onSubmitForm = async (data: New<Cliente>) => {
     const newCliente = await addCliente(db, data);
     if (newCliente) onSubmit(newCliente);
   };

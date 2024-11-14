@@ -5,24 +5,27 @@ import {
   useState,
   useEffect,
 } from "react";
-import { useStorageState } from "../useStorageState";
 import {
   onAuthStateChanged,
   User,
   signOut,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { auth } from "../configs/firebaseConfig";
-import { router } from "expo-router";
+import { auth, db } from "../configs/firebaseConfig";
+import { Href, router, useSegments } from "expo-router";
+import { getUsuarioById } from "@/api/user";
+import { Usuario } from "@/types";
 
 const AuthContext = createContext<{
   signOut: () => void;
-  user?: User | null;
+  user: Usuario | null;
+  setUser: (user: Usuario | null) => void;
   isLoading: boolean;
   setisLoading: (value: boolean) => void;
 }>({
   signOut: () => null,
   user: null,
+  setUser: () => {},
   isLoading: false,
   setisLoading: () => null,
 });
@@ -39,7 +42,7 @@ export const useSession = () => {
 export const loginWithFirebase = async (
   email: string,
   password: string
-): Promise<User | null> => {
+): Promise<Usuario | null> => {
   try {
     const userCredential = await signInWithEmailAndPassword(
       auth,
@@ -49,7 +52,9 @@ export const loginWithFirebase = async (
     const user = userCredential.user;
     console.log("userCredential: ", userCredential);
     console.log("User signed in:", user);
-    return user;
+    const usuario = getUsuarioById(db, user.uid);
+    console.log("usuario: ", usuario);
+    return usuario;
     // Manejo del inicio de sesión exitoso
   } catch (error: any) {
     const errorCode = error.code;
@@ -61,18 +66,27 @@ export const loginWithFirebase = async (
 };
 
 export function SessionProvider({ children }: PropsWithChildren) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<Usuario | null>(null);
   const [isLoading, setisLoading] = useState(false);
 
+  const segments = useSegments();
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      console.log("currentUser: ", currentUser);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (!currentUser) {
         router.replace("/login");
+        setUser(null);
       } else {
-        router.replace("/ventas");
+        const usuario = await getUsuarioById(db, currentUser.uid);
+        // buscar la primer ruta removiendo (app) para redirigir dependiendo del login
+        const route = segments.filter((item) => !item.includes("(app)"))[0];
+        // TODO: buscar la main page basado en el user permisions
+        const mainPage = "ventas";
+        const page = "/" + (!route || route === "login" ? mainPage : route);
+        setUser(usuario);
+        router.replace(page as Href<string>);
       }
-      setUser(currentUser); // Si hay un usuario, se establece, si no, es null
+
+      // Si hay un usuario, se establece, si no, es null
       //setLoading(false); // Deja de cargar una vez que se obtiene el estado del auth
     });
 
@@ -87,6 +101,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
           signOut(auth);
         },
         user,
+        setUser,
         isLoading,
         setisLoading,
       }}

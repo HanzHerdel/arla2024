@@ -6,6 +6,7 @@ import {
   StyleSheet,
   GestureResponderEvent,
 } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 
 interface ClosableModalProps {
   visible: boolean;
@@ -38,7 +39,7 @@ const ClosableModal: React.FC<ClosableModalProps> = ({
         <View style={styles.modalOverlay}>
           <TouchableWithoutFeedback onPress={handleContentPress}>
             <View style={[styles.modalContent, contentContainerStyle]}>
-              {children}
+              <ScrollView>{children}</ScrollView>
             </View>
           </TouchableWithoutFeedback>
         </View>
@@ -59,6 +60,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 8,
     width: "90%",
+    maxHeight: "90%",
     maxWidth: 500,
     // Opcional: añadir sombras
     shadowColor: "#000",

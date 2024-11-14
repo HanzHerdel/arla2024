@@ -1,5 +1,11 @@
 import React from "react";
-import { View, Text, TextInput, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  KeyboardTypeOptions,
+} from "react-native";
 import {
   Control,
   Controller,
@@ -17,6 +23,8 @@ interface FormFieldProps {
   rules?: RulesType;
   required?: boolean;
   errors: FieldErrors;
+  keyboardType?: KeyboardTypeOptions;
+  isNumeric?: boolean;
 }
 const TextField: React.FC<FormFieldProps> = ({
   control,
@@ -26,8 +34,19 @@ const TextField: React.FC<FormFieldProps> = ({
   rules,
   required,
   errors,
+  keyboardType = "default",
+  isNumeric = false,
 }) => {
-  console.log("errors: ", errors, rules);
+  if (isNumeric) {
+    rules = {
+      ...rules,
+      pattern: {
+        value: /^[0-9]*$/,
+        message: "Este campo debe ser numérico",
+      },
+    };
+    keyboardType = "numeric";
+  }
   return (
     <View style={styles.formGroup}>
       <Text style={styles.label}>
@@ -40,6 +59,7 @@ const TextField: React.FC<FormFieldProps> = ({
         rules={rules}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
+            keyboardType={keyboardType}
             style={[styles.input, errors[name] && styles.inputError]}
             onBlur={onBlur}
             onChangeText={onChange}
@@ -57,7 +77,7 @@ const TextField: React.FC<FormFieldProps> = ({
 };
 
 const styles = StyleSheet.create({
-  formGroup: { marginBottom: 20 },
+  formGroup: { margin: 20 },
   label: { fontSize: 16, fontWeight: "bold" },
   input: {
     borderWidth: 1,

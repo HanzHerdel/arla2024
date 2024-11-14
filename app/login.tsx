@@ -1,17 +1,25 @@
 import { loginWithFirebase, useSession } from "@/providers/Session";
+import { setUser } from "@/store/userSlice";
 
 import React, { useState } from "react";
 import { View, TextInput, Button, StyleSheet, Text, Alert } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import useContext from "react";
+import { getUsuarioById } from "@/api/user";
+import { db } from "@/configs/firebaseConfig";
 
 const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const { setUser } = useSession();
 
   const handleLogin = async () => {
     if (email && password) {
-      console.log("Login Info", `Email: ${email}\nPassword: ${password}`);
       const user = await loginWithFirebase(email, password);
-      console.log("response: ", user);
+      if (user) {
+        setUser(user);
+      }
+      console.log("user: ", user);
     } else {
       console.log("Error", "Porfavor llene todos los campos");
     }

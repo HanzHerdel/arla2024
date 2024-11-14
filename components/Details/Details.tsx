@@ -1,11 +1,11 @@
 import React from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { FieldValue, Timestamp } from "firebase/firestore";
-import { Repuestos } from "../../types";
+import { Repuesto } from "../../types";
 import { Icon } from "react-native-elements";
 
 interface RepuestoDetailProps {
-  repuesto: Repuestos;
+  repuesto: Repuesto;
   onClose?: Function;
 }
 

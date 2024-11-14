@@ -1,4 +1,4 @@
-import { RepuestoCart, Repuestos } from "@/types";
+import { RepuestoCart, Repuesto } from "@/types";
 import { formatCurrency } from "./formatCurrency";
 import { formatCompatibility } from "./formatCompatibility";
 
@@ -15,38 +15,38 @@ const columnsCommon = [
     id: "nombre",
     title: "Nombre",
     flex: 3,
-    render: (item: Repuestos) => item.nombre,
+    render: (item: Repuesto) => item.nombre,
   },
   {
     id: "compatibilidad",
     title: "Compatibilidad",
     flex: 2,
-    render: (item: Repuestos) =>
+    render: (item: Repuesto) =>
       formatCompatibility(item.compatibilidadInicial, item.compatibilidadFinal),
   },
   {
     id: "marca",
     title: "Marca",
     flex: 1,
-    render: (item: Repuestos) => item.marca,
+    render: (item: Repuesto) => item.marca,
   },
   {
     id: "linea",
     title: "Línea",
     flex: 1,
-    render: (item: Repuestos) => item.linea,
+    render: (item: Repuesto) => item.linea,
   },
   {
     id: "estacion",
     title: "Estación",
     flex: 1,
-    render: (item: Repuestos) => item.estacion,
+    render: (item: Repuesto) => item.estacion,
   },
   {
     id: "precio",
     title: "Precio",
     flex: 1,
-    render: (item: Repuestos) => formatCurrency(item.precio),
+    render: (item: Repuesto) => formatCurrency(item.precio),
   },
 ];
 
@@ -55,14 +55,14 @@ export const columnsVentas = [
     id: "existencias",
     title: "U",
     width: "2em",
-    render: (item: Repuestos) => item.existencias,
+    render: (item: Repuesto) => item.existencias,
   },
   ...columnsCommon,
   {
     id: "precioDescuento",
     title: "Descuento",
     flex: 1,
-    render: (item: Repuestos) => formatCurrency(item.precioDescuento),
+    render: (item: Repuesto) => formatCurrency(item.precioDescuento),
   },
 ];
 

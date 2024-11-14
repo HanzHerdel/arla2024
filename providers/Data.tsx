@@ -1,10 +1,10 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { collection, getDocs, query, limit } from "firebase/firestore";
 import { db } from "../configs/firebaseConfig"; // Asegúrate de importar tu configuración de Firebase
-import { Repuestos } from "@/types";
+import { Repuesto } from "@/types";
 
 interface FirestoreContextType {
-  repuestos: Repuestos[]; // Aquí almacenaremos los artículos
+  repuestos: Repuesto[]; // Aquí almacenaremos los artículos
   loading: boolean; // Para indicar si estamos cargando los datos
   /*  getRepuestos: () => Promise<void>; */ // Función para obtener los artículos
 }
@@ -16,7 +16,7 @@ const FirestoreContext = createContext<FirestoreContextType | undefined>(
 const FirestoreProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [repuestos, setRepuestos] = useState<Repuestos[]>([]);
+  const [repuestos, setRepuestos] = useState<Repuesto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   /*   const getRepuestos = async () => {

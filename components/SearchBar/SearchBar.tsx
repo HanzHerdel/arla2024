@@ -3,8 +3,8 @@ import { View, TextInput, StyleSheet, Dimensions } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 
 import { db } from "@/configs/firebaseConfig";
-import { getCollectionData } from "@/api/getGenericCollection";
-import { Lineas, Marcas, Modelos } from "@/types";
+import { getCollectionData } from "@/api/getGenericCollections";
+import { Linea, Marca, Modelo } from "@/types";
 
 interface SearchFilterProps {
   searchText: string;
@@ -28,17 +28,17 @@ const SearchBar: React.FC<SearchFilterProps> = ({
   setLine,
 }) => {
   // Datos de ejemplo para los selectores
-  const [lineas, setLineas] = useState<Lineas[]>([]);
+  const [lineas, setLineas] = useState<Linea[]>([]);
 
-  const [marcas, setMarcas] = useState<Marcas[]>([]);
-  const [modelos, setModelos] = useState<Modelos[]>([]);
+  const [marcas, setMarcas] = useState<Marca[]>([]);
+  const [modelos, setModelos] = useState<Modelo[]>([]);
 
   useEffect(() => {
-    getCollectionData<Lineas>(db, "lineas", setLineas);
+    getCollectionData<Linea>(db, "lineas", setLineas);
 
-    getCollectionData<Marcas>(db, "marcas", setMarcas);
+    getCollectionData<Marca>(db, "marcas", setMarcas);
 
-    getCollectionData<Modelos>(db, "modelos", setModelos, "modelo");
+    getCollectionData<Modelo>(db, "modelos", setModelos, "modelo");
   }, []);
 
   return (

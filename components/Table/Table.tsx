@@ -4,24 +4,22 @@ import {
   StyleSheet,
   Platform,
   Animated,
-  PanResponder,
   ScrollView,
-  GestureResponderEvent,
-  PanResponderGestureState,
   Pressable,
 } from "react-native";
 import { Icon, Text } from "react-native-elements";
 import { TouchableOpacity } from "react-native";
-import { RepuestoCart, Repuestos } from "@/types";
+import { RepuestoCart, Repuesto } from "@/types";
 import { Column } from "./utils/columns";
 
 interface ResponsiveTableProps {
-  items: Repuestos[];
+  items: Repuesto[];
   columns: Column[];
-  onIncrement?: (item: RepuestoCart | Repuestos) => void;
+  onIncrement?: (item: RepuestoCart | Repuesto) => void;
   onDecrement?: (item: RepuestoCart) => void;
-  handleSelect?: (item: Repuestos) => void;
+  handleSelect?: (item: Repuesto) => void;
   style?: any;
+  salesVersion?: boolean;
 }
 
 const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
@@ -30,6 +28,7 @@ const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
   onIncrement,
   onDecrement,
   handleSelect = () => {},
+  salesVersion = true,
 }) => {
   const scrollX = useRef(new Animated.Value(0)).current;
   const [isScrolling, setIsScrolling] = useState(false);
@@ -48,13 +47,15 @@ const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
           <Text style={styles.headerText}>{column.title}</Text>
         </View>
       ))}
-      <View style={styles.actionsHeader}>
-        <Text style={styles.headerText}>Acciones</Text>
-      </View>
+      {salesVersion && (
+        <View style={styles.actionsHeader}>
+          <Text style={styles.headerText}>Acciones</Text>
+        </View>
+      )}
     </View>
   );
 
-  const renderRow = (item: Repuestos, index: number) => (
+  const renderRow = (item: Repuesto, index: number) => (
     <View
       key={item.id + index}
       style={[
@@ -93,37 +94,24 @@ const ResponsiveTable: React.FC<ResponsiveTableProps> = ({
           </View>
         ))}
       </Pressable>
-      <View style={styles.actionsCell}>
-        <TouchableOpacity
-          onPress={() => onDecrement?.(item as RepuestoCart)}
-          style={[styles.actionButton, styles.decrementButton]}
-        >
-          <Icon name="remove" type="material" size={20} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => onIncrement?.(item)}
-          style={[styles.actionButton, styles.incrementButton]}
-        >
-          <Icon name="add" type="material" size={20} color="white" />
-        </TouchableOpacity>
-      </View>
+      {salesVersion && (
+        <View style={styles.actionsCell}>
+          <TouchableOpacity
+            onPress={() => onDecrement?.(item as RepuestoCart)}
+            style={[styles.actionButton, styles.decrementButton]}
+          >
+            <Icon name="remove" type="material" size={20} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => onIncrement?.(item)}
+            style={[styles.actionButton, styles.incrementButton]}
+          >
+            <Icon name="add" type="material" size={20} color="white" />
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        setIsScrolling(true);
-      },
-      onPanResponderMove: Animated.event([null, { dx: scrollX }], {
-        useNativeDriver: false,
-      }),
-      onPanResponderRelease: () => {
-        setIsScrolling(false);
-      },
-    })
-  ).current;
 
   return (
     <View
