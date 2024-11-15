@@ -227,14 +227,18 @@ const VentasScreen: React.FC = ({}) => {
   };
   console.log("clientData: ", clientData);
 
+  console.log("repuestoSeleccionado: ", repuestoSeleccionado);
   return (
     <View style={{ flex: 1 }}>
-      <TrasladoModal
-        visible={modalTraslado}
-        onDismiss={() => setModalTrasladoVisible(false)}
-        repuesto={repuestoSeleccionado}
-        ubicacionOrigen={Ubicacion.ventas}
-      />
+      {repuestoSeleccionado && (
+        <TrasladoModal
+          visible={modalTraslado}
+          onDismiss={() => setModalTrasladoVisible(false)}
+          repuesto={repuestoSeleccionado}
+          ubicacionOrigen={Ubicacion.ventas}
+          closeModal={() => setModalTrasladoVisible(false)}
+        />
+      )}
       <View style={styles.container}>
         {/* Barra de busqueda y tabla de resultados */}
         <SearchBar

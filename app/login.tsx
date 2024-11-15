@@ -1,12 +1,7 @@
 import { loginWithFirebase, useSession } from "@/providers/Session";
-import { setUser } from "@/store/userSlice";
 
 import React, { useState } from "react";
-import { View, TextInput, Button, StyleSheet, Text, Alert } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import useContext from "react";
-import { getUsuarioById } from "@/api/user";
-import { db } from "@/configs/firebaseConfig";
+import { View, TextInput, Button, StyleSheet, Text } from "react-native";
 
 const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState<string>("");

@@ -59,13 +59,7 @@ export interface Pass {
   id: string;
   pass: string;
 }
-export interface User {
-  id: string;
-  admin: boolean;
-  sueprUser: boolean;
-  nombre: string;
-  telefono: string;
-}
+
 export interface ItemVenta {
   item: string;
   unidades: number;
@@ -77,6 +71,7 @@ export interface ItemVenta {
   categoria: number;
   codigo: string;
 }
+
 export interface Venta {
   id: string;
   cliente: Cliente;
@@ -90,11 +85,10 @@ export interface Venta {
 export interface Usuario {
   id: string;
   admin: boolean;
+  sueprUser: boolean;
   nombre: string;
-  password: string;
-  superUser: boolean;
-  tel: string;
-  usuario: string;
+  telefono: string;
+  ubicacion?: Ubicacion;
 }
 
 export interface Estacion {
@@ -153,13 +147,16 @@ export interface Historial {
   changes?: Record<string, any>;
 }
 
-export interface SolicitudDeTraslados {
-  usuarioSolicitud: User;
-  usuarioEnProgreso: User;
+export interface Traslados {
+  id: string;
+  usuarioSolicitud: string;
+  usuarioEnProgreso?: string;
   ubicacion: Ubicacion;
   destino: Ubicacion;
+  //origen: Ubicacion;
   estado: EstadoTraslado;
+  // unidades: number;
   fechaInicio: FieldValue | Timestamp;
-  fechaEnProgreso: FieldValue | Timestamp;
-  fechaEntregado: FieldValue | Timestamp;
+  fechaEnProgreso?: FieldValue | Timestamp;
+  fechaEntregado?: FieldValue | Timestamp;
 }

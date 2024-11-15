@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
 import { Modal, Portal, Button, Text, Surface, List } from "react-native-paper";
 import GenericSelect from "../Select/SelectGeneric";
 import { useElemento } from "@/store/elementosSlice";
-import { Repuesto } from "@/types";
+import { GenericValue, Repuesto } from "@/types";
 import { Ubicacion } from "@/utils/constants";
+import { useSession } from "@/providers/Session";
+import { createTraslado } from "@/api/traslados";
+import { db } from "@/configs/firebaseConfig";
 
 interface TrasladoData {
   origen: string;
@@ -16,7 +19,7 @@ interface TrasladoModalProps {
   onDismiss: () => void;
   onConfirm?: (data: TrasladoData) => void;
   repuesto: Repuesto | null;
-
+  closeModal: Function;
   ubicacionOrigen?: Ubicacion;
 }
 
@@ -24,20 +27,50 @@ const TrasladoModal: React.FC<TrasladoModalProps> = ({
   visible,
   onDismiss,
   onConfirm,
-  repuesto = null,
+  repuesto,
+  closeModal,
   ubicacionOrigen,
 }) => {
-  const [ubicacionDestino, setUbicacionDestino] = useState<string>("");
+  const [ubicacionDestino, setUbicacionDestino] = useState<GenericValue>();
+
+  const [ubicacionActual, setUbicacionActual] = useState<GenericValue>();
+
+  const { user } = useSession();
 
   const ubicaciones = useElemento("ubicaciones");
 
-  const ubicacionSolicutud = ubicaciones.find(
-    (ub) => ub.id === ubicacionOrigen
-  );
+  useEffect(() => {
+    const ubicacionSolicutud = ubicaciones.find(
+      (ub) => ub.id === ubicacionOrigen
+    );
+    const ubicacionRepuesto = ubicaciones.find(
+      (ub) => ub.id === repuesto?.ubicacion
+    );
+    setUbicacionDestino(ubicacionSolicutud);
+    setUbicacionActual(ubicacionRepuesto);
+  }, []);
 
-  const ubicacionRep = ubicaciones.find((ub) => ub.id === repuesto?.ubicacion);
-  const handleConfirm = (): void => {
-    console.log("crear traslado", ubicacionDestino, ubicacionSolicutud);
+  const handleConfirm = async () => {
+    console.log("ubicacionSalida: ", ubicacionActual);
+    console.log("ubicacionDestino: ", ubicacionDestino);
+    if (
+      !ubicacionActual ||
+      !ubicacionDestino ||
+      ubicacionActual.id === Ubicacion.indefinida ||
+      ubicacionDestino.id === Ubicacion.indefinida
+    ) {
+      console.log("ambas ubicaciones deben ser definidas");
+      return;
+    }
+    const res = await createTraslado(
+      db,
+      ubicacionActual,
+      ubicacionDestino,
+      user!
+    );
+    if (res) {
+      closeModal();
+    }
   };
 
   return (
@@ -54,9 +87,9 @@ const TrasladoModal: React.FC<TrasladoModalProps> = ({
               data={ubicaciones}
               label="Salida"
               selectedField="id"
-              onChange={setUbicacionDestino}
-              disabled
-              defaultValue={ubicacionRep}
+              onChange={setUbicacionActual}
+              // disabled={!!ubicacionOrigen}
+              defaultValue={ubicacionActual}
             />
           </View>
 
@@ -67,7 +100,7 @@ const TrasladoModal: React.FC<TrasladoModalProps> = ({
               data={ubicaciones}
               selectedField="id"
               onChange={setUbicacionDestino}
-              defaultValue={ubicacionSolicutud}
+              defaultValue={ubicacionDestino}
             />
           </View>
 

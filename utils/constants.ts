@@ -24,6 +24,7 @@ export enum Collections {
   repuestos = "repuestos",
   historial = "historial",
   clientes = "clientes",
+  solicitudTraslado = "traslados",
 }
 
 export enum TipoHistorial {

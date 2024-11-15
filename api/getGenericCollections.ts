@@ -63,7 +63,6 @@ export const subscribeDataForRedux = <T>(
         ...doc.data(),
       })) as T[];
 
-      console.log("fetchedData: ", fetchedData);
       dispatch(onDataUpdate(fetchedData));
     });
 

@@ -7,7 +7,7 @@ import {
 } from "react";
 import {
   onAuthStateChanged,
-  User,
+  User as UserFirebase,
   signOut,
   signInWithEmailAndPassword,
 } from "firebase/auth";

@@ -62,6 +62,7 @@ const BodegaScreen: React.FC = ({}) => {
         onDismiss={() => setModalTrasladoVisible(false)}
         repuesto={repuestoSeleccionado}
         ubicacionOrigen={Ubicacion.bodega}
+        closeModal={() => setModalTrasladoVisible(false)}
       />
     </View>
   );

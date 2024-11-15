@@ -9,15 +9,15 @@ import { Provider as PaperProvider } from "react-native-paper";
 export default function Root() {
   return (
     <SafeAreaProvider>
-      <Provider store={store}>
-        <SessionProvider>
-          <FirestoreProvider>
+      <SessionProvider>
+        <FirestoreProvider>
+          <Provider store={store}>
             <PaperProvider>
               <Slot />
             </PaperProvider>
-          </FirestoreProvider>
-        </SessionProvider>
-      </Provider>
+          </Provider>
+        </FirestoreProvider>
+      </SessionProvider>
     </SafeAreaProvider>
   );
 }
