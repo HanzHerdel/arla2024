@@ -8,6 +8,7 @@ import {
   query,
 } from "firebase/firestore";
 import { getQuery } from "./getQuery";
+import { Collections } from "@/utils/constants";
 
 export const getUsuarioById = async (
   db: Firestore,
@@ -35,7 +36,7 @@ export const getUsuarios = async (
   setusuarios: (u: Usuario[]) => void
 ): Promise<Usuario[] | null> => {
   try {
-    const collRef = collection(db, "users");
+    const collRef = collection(db, Collections.users);
     const repQuery = query(collRef, orderBy("nombre", "asc"));
     const result = await getQuery<Usuario>(repQuery);
     console.log("result: ", result);

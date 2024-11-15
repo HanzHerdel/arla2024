@@ -1,5 +1,10 @@
-import { Usuario } from "@/types";
-import { Collections } from "@/utils/constants";
+import { Historial, ItemVenta, New, Usuario } from "@/types";
+import {
+  AccionHistorial,
+  Collections,
+  RazonHistorial,
+  TipoHistorial,
+} from "@/utils/constants";
 import {
   Firestore,
   doc,
@@ -8,18 +13,6 @@ import {
   deleteDoc,
   collection,
 } from "firebase/firestore";
-
-interface ItemVenta {
-  item: string;
-  unidades: number;
-  nombre: string;
-  marca: string;
-  linea: string;
-  modelo: string;
-  precio: number;
-  categoria: number;
-  codigo: string;
-}
 
 /**
  * Revierte una venta: incrementa las existencias de los productos y elimina el registro de venta
@@ -34,7 +27,7 @@ export const processRevertSell = async (
     const timestamp = serverTimestamp();
     await runTransaction(db, async (transaction) => {
       // Obtener el documento de la venta
-      const ventaRef = doc(db, "ventas", ventaId);
+      const ventaRef = doc(db, Collections.ventas, ventaId);
       const ventaSnapshot = await transaction.get(ventaRef);
 
       if (!ventaSnapshot.exists()) {
@@ -46,7 +39,7 @@ export const processRevertSell = async (
 
       // Actualizar existencias de cada producto
       for (const item of items) {
-        const repuestoRef = doc(db, "repuestos", item.item);
+        const repuestoRef = doc(db, Collections.repuestos, item.item);
         const repuestoSnapshot = await transaction.get(repuestoRef);
 
         if (!repuestoSnapshot.exists()) {
@@ -63,9 +56,23 @@ export const processRevertSell = async (
           existencias: nuevaCantidad,
           fechaDeModificacion: timestamp,
         });
+        // creacion historial de repuestos
+        const historialRef = doc(collection(db, Collections.historial));
+        const historialDoc: New<Historial> = {
+          tipo: TipoHistorial.historialProducto,
+          accion: AccionHistorial.eliminacion,
+          fecha: timestamp,
+          unidades: item.unidades,
+          idRepuesto: item.item,
+          ventaId: ventaId,
+          usuario: user.id,
+        };
+        transaction.set(historialRef, historialDoc);
       }
       // agregar entrada a la colleccion ventasDeleted
-      const ventaDeletedRef = doc(collection(db, Collections.ventasDeleted));
+      const ventaDeletedRef = doc(
+        collection(db, Collections.ventasDeleted, ventaId)
+      );
       transaction.set(ventaDeletedRef, {
         ...ventaData,
         fechaEliminacion: serverTimestamp(),
@@ -75,6 +82,16 @@ export const processRevertSell = async (
       });
       // eliminar venta
       transaction.delete(ventaRef);
+      // creacopm historial de ventas
+      const historialRef = doc(collection(db, Collections.historial));
+      const historialDoc: New<Historial> = {
+        tipo: TipoHistorial.historialVentas,
+        accion: AccionHistorial.eliminacion,
+        fecha: timestamp,
+        ventaId: ventaId,
+        usuario: user.id,
+      };
+      transaction.set(historialRef, historialDoc);
     });
 
     console.log("Reversión de venta completada correctamente");

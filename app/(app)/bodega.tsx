@@ -7,14 +7,26 @@ import { columnsVentas } from "@/components/Table/utils/columns";
 import ClosableModal from "@/components/ClosableModal/ClosableModal";
 import RepuestoForm from "@/components/Forms/RepuestosForm/RepuestosForm";
 import SearchBarRepuestos from "@/components/SearchRepuestosBar/SearchRepuestosBar";
+import RepuestoDetail from "@/components/Details/Details";
+import TrasladoModal from "@/components/ModalTraslado/ModalTraslado";
+import { Ubicacion } from "@/utils/constants";
 
-const InventarioScreen: React.FC = ({}) => {
+const BodegaScreen: React.FC = ({}) => {
   const [searchResults, setsearchResults] = useState<Repuesto[]>([]);
-  const [repSelected, setrepSelected] = useState<Repuesto | null>();
+  const [repuestoSeleccionado, setrepSelected] = useState<Repuesto | null>(
+    null
+  );
+  console.log("repuestoSeleccionado: ", repuestoSeleccionado);
   const handleSelectItem = (item: Repuesto | null) => {
+    console.log("item: ", item);
     setrepSelected(item);
   };
+  const [modalTraslado, setModalTrasladoVisible] = useState<boolean>(false);
 
+  const handleConfirm = (data: any): void => {
+    console.log("Traslado:", data);
+    // Manejar el traslado aquí
+  };
   return (
     <View style={{ flex: 1 }}>
       <SearchBarRepuestos setRepuestos={setsearchResults}>
@@ -30,13 +42,27 @@ const InventarioScreen: React.FC = ({}) => {
           handleSelect={handleSelectItem}
           salesVersion={false}
         />
-        <ClosableModal
+        {repuestoSeleccionado && (
+          <View>
+            <RepuestoDetail
+              repuesto={repuestoSeleccionado}
+              onClose={() => setrepSelected(null)}
+              setModalVisible={setModalTrasladoVisible}
+            />
+          </View>
+        )}
+        {/*         <ClosableModal
           onClose={() => setrepSelected(null)}
           visible={!!repSelected}
         >
-          <RepuestoForm repuesto={repSelected} action="UPDATE" fullMode />
-        </ClosableModal>
+        </ClosableModal> */}
       </SearchBarRepuestos>
+      <TrasladoModal
+        visible={modalTraslado}
+        onDismiss={() => setModalTrasladoVisible(false)}
+        repuesto={repuestoSeleccionado}
+        ubicacionOrigen={Ubicacion.bodega}
+      />
     </View>
   );
 };
@@ -102,4 +128,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default InventarioScreen;
+export default BodegaScreen;

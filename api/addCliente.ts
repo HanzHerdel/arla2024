@@ -1,4 +1,5 @@
 import { Cliente } from "@/types";
+import { Collections } from "@/utils/constants";
 import { collection, Firestore, addDoc } from "firebase/firestore";
 
 export const addCliente = async (
@@ -6,10 +7,8 @@ export const addCliente = async (
   cliente: Omit<Cliente, "id">
 ) => {
   try {
-    const clientesCollection = collection(db, "clientes");
+    const clientesCollection = collection(db, Collections.clientes);
     const newClient = await addDoc(clientesCollection, cliente);
-    console.log("newClient: ", newClient);
-
     return { id: newClient.id, ...cliente } as Cliente;
   } catch (error) {
     console.error("Error adding cliente: ", error);

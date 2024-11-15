@@ -5,6 +5,7 @@ import {
   Firestore,
   serverTimestamp,
   setDoc,
+  updateDoc,
 } from "firebase/firestore";
 
 export const createGenericDocument = async <T>(
@@ -30,7 +31,6 @@ export const createGenericDocument = async <T>(
 
     await setDoc(docRef, documentData);
     console.log("elemento creado con exito", collectionName, documentData);
-    // Retornar el documento creado con su ID
     return {
       ...data,
       id: docRef.id,
@@ -38,5 +38,27 @@ export const createGenericDocument = async <T>(
   } catch (error) {
     console.error(`Error creating document in ${collectionName}:`, error);
     return null;
+  }
+};
+
+export const updateGenericDocument = async <T>(
+  db: Firestore,
+  collectionName: Collections,
+  documentId: string,
+  data: Partial<T>
+): Promise<boolean> => {
+  try {
+    const docRef = doc(db, collectionName, documentId);
+    const documentData = {
+      ...data,
+      fechaDeModificacion: serverTimestamp(),
+    };
+
+    await updateDoc(docRef, documentData);
+    console.log("elemento actualizado con éxito", collectionName, documentData);
+    return true;
+  } catch (error) {
+    console.error(`Error updating document in ${collectionName}:`, error);
+    return false;
   }
 };

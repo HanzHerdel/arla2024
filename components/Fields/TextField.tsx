@@ -59,6 +59,7 @@ const TextField: React.FC<FormFieldProps> = ({
         rules={rules}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
+            inputMode={isNumeric ? "numeric" : "text"}
             keyboardType={keyboardType}
             style={[styles.input, errors[name] && styles.inputError]}
             onBlur={onBlur}

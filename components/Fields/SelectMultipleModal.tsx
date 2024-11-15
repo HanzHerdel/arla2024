@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -22,6 +22,7 @@ interface SelectFieldProps {
   required?: boolean;
   labelName?: string;
   valueName?: string;
+  defaultValue?: Array<any>; // Nueva prop para valores preseleccionados
 }
 
 export const SelectMultipleModal = ({
@@ -35,9 +36,21 @@ export const SelectMultipleModal = ({
   placeholder = "Seleccione una opción",
   labelName = "nombre",
   valueName = "id",
+  defaultValue = [], // Valor por defecto vacío
 }: SelectFieldProps) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
+
+  // Efecto para inicializar los items seleccionados
+  useEffect(() => {
+    if (defaultValue.length > 0) {
+      // Encontrar los items completos basados en los IDs preseleccionados
+      const preselectedItems = items.filter((item) =>
+        defaultValue.includes(item[valueName])
+      );
+      setSelectedItems(preselectedItems);
+    }
+  }, [defaultValue, items, valueName]);
 
   const toggleSelection = (item: any) => {
     setSelectedItems((prev) =>
@@ -57,6 +70,7 @@ export const SelectMultipleModal = ({
         control={control}
         name={name}
         rules={rules}
+        defaultValue={defaultValue} // Establecer valor por defecto en el Controller
         render={({ field: { onChange, value } }) => (
           <>
             <TouchableOpacity

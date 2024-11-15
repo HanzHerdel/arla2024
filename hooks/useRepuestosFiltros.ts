@@ -8,59 +8,77 @@ import {
   limit,
   onSnapshot,
 } from "firebase/firestore";
+import { Collections, CONECTORES } from "@/utils/constants";
+import { Repuesto } from "@/types";
 
-interface Repuesto {
-  id: string;
-  marca: string;
-  linea: string;
+interface GetRepuestosVentas {
   nombre: string;
-  // Agrega otros campos relevantes para tu aplicación
+  marca?: string;
+  linea?: string | null;
+  estacion?: string | null;
+  modelo?: string;
+  limite?: number;
+  proveedor?: string;
+  ubicacion?: string;
 }
 
-const useRepuestos = (
-  marca: string | null = null,
-  linea: string | null = null,
-  nombre: string = ""
-) => {
+const useRepuestos = ({
+  marca,
+  linea,
+  nombre,
+  estacion,
+  modelo,
+  proveedor,
+  ubicacion,
+  limite = 32,
+}: GetRepuestosVentas) => {
+  console.log("ubicacion: ", ubicacion);
   const [repuestos, setRepuestos] = useState<Repuesto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const keyWord = nombre.split(" ", 1)[0];
-    const repuestosCollection = collection(db, "repuestos");
+    const keyWords = nombre
+      .split(" ")
+      .filter((word) => !CONECTORES.includes(word));
 
-    // Crear la consulta inicial
-    let q = query(repuestosCollection, orderBy("nombre", "asc"), limit(32));
+    const repuestosCollection = collection(db, Collections.repuestos);
 
-    if (marca && linea) {
-      q = query(
-        q,
-        where("marca", "==", marca),
-        where("linea", "==", linea),
-        where("nombre", ">=", nombre)
-      );
-    } else if (marca) {
-      q = query(q, where("marca", "==", marca), where("nombre", ">=", nombre));
-    } else if (linea) {
-      q = query(q, where("linea", "==", linea), where("nombre", ">=", nombre));
-    } else {
-      q = query(
-        q,
-        where("keyWords", "array-contains", keyWord),
-        where("nombre", ">=", nombre)
-      );
+    const queryArray = [];
+    marca && queryArray.push(where("marca", "==", marca));
+    linea && queryArray.push(where("linea", "==", linea));
+    proveedor && queryArray.push(where("proveedor", "==", proveedor));
+    ubicacion && queryArray.push(where("ubicacion", "==", ubicacion));
+
+    if (keyWords.length)
+      queryArray.push(where("keyWords", "array-contains-any", keyWords));
+    /*     else {
+      queryArray.push(where("nombre", ">=", nombre));
+    } */
+    if (modelo) {
+      queryArray.push(where("compatibilidadInicial", "<=", modelo));
+      queryArray.push(where("compatibilidadFinal", ">=", modelo));
     }
+    console.log("queryArray: ", queryArray);
+
+    estacion && queryArray.push(where("estacion", "==", estacion));
+    const repQuery = query(
+      repuestosCollection,
+      ...queryArray,
+      orderBy("nombre", "asc"),
+      limit(limite)
+    );
 
     // Escuchar cambios en tiempo real
     const unsubscribe = onSnapshot(
-      q,
+      repQuery,
       (snapshot) => {
         const fetchedRepuestos = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         })) as Repuesto[];
 
+        console.log("fetchedRepuestos: ", fetchedRepuestos);
         setRepuestos(fetchedRepuestos);
         setLoading(false);
       },
@@ -72,7 +90,7 @@ const useRepuestos = (
     );
 
     return () => unsubscribe(); // Limpiar la suscripción al desmontar el componente
-  }, [marca, linea, nombre]);
+  }, [marca, linea, nombre, modelo, ubicacion, proveedor]);
 
   return { repuestos, loading, error };
 };

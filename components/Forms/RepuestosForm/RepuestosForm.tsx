@@ -13,19 +13,21 @@ import TextField from "../../Fields/TextField";
 import SelectField from "../../Fields/SelectField";
 import { db } from "@/configs/firebaseConfig";
 import { EstadoRepuesto, New, Repuesto } from "@/types";
-import { globalStyles } from "../../../utils/styles";
 import { useElementos } from "@/store/elementosSlice";
 import SelectMultipleModal from "@/components/Fields/SelectMultipleModal";
 import { useSession } from "@/providers/Session";
-import { createGenericDocument } from "@/api/genericActions";
-import { Collections } from "@/utils/constants";
+
 import { getKeyWordsFromName } from "@/utils/keywords";
+import { convertRepValuesToNumbers } from "@/api/utils";
+import { createRepuesto, updateRepuesto } from "@/api/repuestos";
+import { Ubicacion } from "@/utils/constants";
 
 interface RepuestoFormProps {
   onSubmit?: (formData: Repuesto) => void;
   action?: "ADD" | "UPDATE";
   repuesto?: Repuesto | null;
   contentContainerStyle?: object;
+  fullMode?: boolean;
 }
 
 const RepuestoForm: React.FC<RepuestoFormProps> = ({
@@ -33,6 +35,7 @@ const RepuestoForm: React.FC<RepuestoFormProps> = ({
   action = "ADD",
   repuesto,
   contentContainerStyle,
+  fullMode = false,
 }) => {
   const defaultValues = {
     codigo: "",
@@ -46,10 +49,17 @@ const RepuestoForm: React.FC<RepuestoFormProps> = ({
     lado: [],
     estado: "" as EstadoRepuesto,
     proveedor: "",
-    existencias: 0,
     estacion: "",
     marca: "",
     categoria: "",
+    Ubicacion: Ubicacion.indefinida,
+    ...(fullMode
+      ? {
+          existencias: 0,
+          precio: 0,
+          precioDescuento: 0,
+        }
+      : {}),
   };
   const {
     control,
@@ -71,6 +81,7 @@ const RepuestoForm: React.FC<RepuestoFormProps> = ({
     modelos,
     estados,
     lados,
+    ubicaciones,
   } = useElementos();
 
   const [lineasFiltered, setLineasFiltered] = useState(lineas);
@@ -94,17 +105,26 @@ const RepuestoForm: React.FC<RepuestoFormProps> = ({
 
   const { user } = useSession();
   const onSubmitForm = async (data: New<Repuesto>) => {
+    console.log("data: ", data);
+    // Primero convertimos los campos numéricos
+    const convertedData = convertRepValuesToNumbers(data);
+    console.log("convertedData: ", convertedData);
     data.nombre = data.nombre.toUpperCase();
     data.keyWords = getKeyWordsFromName(data.nombre);
     if (action === "ADD") {
-      const newRepuesto = await createGenericDocument<New<Repuesto>>(
+      const newRepuesto = await createRepuesto(
         db,
-        Collections.repuestos,
-        data
+        convertedData as New<Repuesto>,
+        user!
       );
     }
-    if (action === "UPDATE") {
-      console.log("data: ", data);
+    if (action === "UPDATE" && repuesto) {
+      const updatedRepuesto = await updateRepuesto(
+        db,
+        repuesto.id,
+        convertedData as Repuesto,
+        user!
+      );
     }
   };
 
@@ -243,6 +263,7 @@ const RepuestoForm: React.FC<RepuestoFormProps> = ({
             errors={errors}
             items={lados} // Aquí irían las opciones de lado
             required
+            defaultValue={repuesto?.lado}
           />
 
           <SelectField
@@ -266,22 +287,64 @@ const RepuestoForm: React.FC<RepuestoFormProps> = ({
             required
           />
 
-          {!!user?.superUser && (
-            <TextField
-              name="existencias"
-              label="Existencias"
-              control={control}
-              rules={{
-                required: "El campo Existencias es obligatorio",
-                min: {
-                  value: 0,
-                  message: "Las existencias no pueden ser negativas",
-                },
-              }}
-              errors={errors}
-              placeholder="Ingrese la cantidad"
-              isNumeric
-            />
+          <SelectField
+            name="ubicacion"
+            label="Ubicacion"
+            control={control}
+            rules={{ required: "El campo Estado es obligatorio" }}
+            errors={errors}
+            items={ubicaciones}
+            required
+          />
+
+          {fullMode && (
+            <React.Fragment>
+              <TextField
+                name="existencias"
+                label="Existencias"
+                control={control}
+                rules={{
+                  required: "El campo Existencias es obligatorio",
+                  min: {
+                    value: 0,
+                    message: "Las existencias no pueden ser negativas",
+                  },
+                }}
+                errors={errors}
+                placeholder="Ingrese la cantidad"
+                isNumeric
+              />
+              <TextField
+                name="precioDescuento"
+                label="Precio"
+                control={control}
+                rules={{
+                  required: "El campo Existencias es obligatorio",
+                  min: {
+                    value: 0,
+                    message: "El precio no puede ser negativo",
+                  },
+                }}
+                errors={errors}
+                placeholder="Precio"
+                isNumeric
+              />
+              <TextField
+                name="precio"
+                label="Precio Descuento"
+                control={control}
+                rules={{
+                  required: "El campo Existencias es obligatorio",
+                  min: {
+                    value: 0,
+                    message: "El precio no puede ser negativo",
+                  },
+                }}
+                errors={errors}
+                placeholder="Precio con Descuento"
+                isNumeric
+              />
+            </React.Fragment>
           )}
         </View>
         <TouchableOpacity

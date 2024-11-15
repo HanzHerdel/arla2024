@@ -1,28 +1,37 @@
-import { ItemVenta, RepuestoCart, Usuario } from "@/types";
+import { Historial, ItemVenta, RepuestoCart, Usuario, New } from "@/types";
+import { AccionHistorial, Collections, TipoHistorial } from "@/utils/constants";
+
 import {
   collection,
   doc,
   Firestore,
   runTransaction,
   serverTimestamp,
-  writeBatch,
 } from "firebase/firestore";
 
 /**
- * Actualiza la cantidad de existencias y ultima actualizacion de shopList y crea una registro de venta
+ * Actualiza la cantidad de existencias y ultima actualizacion de shopList,
+ * crea un registro de venta y añade documentos al historial por cada item
  * utiliza una transacción para la atomicidad de la operacion
  */
 export const proccessSell = async (
   db: Firestore,
   shopList: RepuestoCart[],
-  ventaData: any
-  //usuario: Usuario
+  ventaData: any,
+  usuario: Usuario
 ): Promise<boolean> => {
   try {
     const timestamp = serverTimestamp();
     await runTransaction(db, async (transaction) => {
+      // Crear primero la referencia del documento de venta
+      const ventasCollectionRef = collection(db, Collections.ventas);
+      const newVentaRef = doc(ventasCollectionRef);
+      const ventaId = newVentaRef.id;
+      console.log("ventaId: ", ventaId);
+
+      // Procesar cada item del shopList
       for (const actualizacion of shopList) {
-        const repuestoRef = doc(db, "repuestos", actualizacion.id);
+        const repuestoRef = doc(db, Collections.repuestos, actualizacion.id);
         const repuestoSnapshot = await transaction.get(repuestoRef);
         console.log("repuestoSnapshot: ", repuestoSnapshot);
 
@@ -61,15 +70,36 @@ export const proccessSell = async (
       }));
       ventaData.items = ventaItems;
       ventaData.fecha = timestamp;
-      console.log("ventaData: ", ventaData);
-      //ventaData.vendedor = usuario.id;
-      // Agregar la venta
-      const ventasRef = doc(collection(db, "ventas"));
-      transaction.set(ventasRef, ventaData);
+      // Usar la referencia creada anteriormente
+      transaction.set(newVentaRef, ventaData);
+      // Crear documentos en la colección Historial para cada item
+      for (const item of shopList) {
+        const historialRef = doc(collection(db, Collections.historial));
+        const historialDoc: New<Historial> = {
+          tipo: TipoHistorial.historialProducto,
+          accion: AccionHistorial.venta,
+          fecha: timestamp,
+          unidades: item.cantidad,
+          idRepuesto: item.id,
+          ventaId: ventaId,
+          usuario: usuario.id,
+        };
+        transaction.set(historialRef, historialDoc);
+      }
+
+      const historialRef = doc(collection(db, Collections.historial));
+      const historialDoc: New<Historial> = {
+        tipo: TipoHistorial.historialVentas,
+        accion: AccionHistorial.venta,
+        fecha: timestamp,
+        ventaId: ventaId,
+        usuario: usuario.id,
+      };
+      transaction.set(historialRef, historialDoc);
     });
 
     console.log(
-      "Actualización de cantidades y registro de ventas completados correctamente"
+      "Actualización de cantidades, registro de ventas e historial completados correctamente"
     );
     return true;
   } catch (error) {

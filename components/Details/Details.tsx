@@ -4,14 +4,18 @@ import { FieldValue, Timestamp } from "firebase/firestore";
 import { Repuesto } from "../../types";
 import { Icon } from "react-native-elements";
 
+import { Button } from "react-native-paper";
+import { globalStyles } from "@/utils/styles";
 interface RepuestoDetailProps {
   repuesto: Repuesto;
+  setModalVisible?: Function;
   onClose?: Function;
 }
 
 const RepuestoDetail: React.FC<RepuestoDetailProps> = ({
   repuesto,
   onClose,
+  setModalVisible,
 }) => {
   const formatDate = (fieldValue: FieldValue | undefined) => {
     if (!fieldValue) return "-";
@@ -35,8 +39,19 @@ const RepuestoDetail: React.FC<RepuestoDetailProps> = ({
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Detalle Repuesto: {repuesto.nombre}</Text>
+      <View style={[styles.header, globalStyles.flexBoxRow, { marginTop: 8 }]}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.title}>Detalle Repuesto: {repuesto.nombre}</Text>
+        </View>
+        <View style={{ alignItems: "flex-end", flex: 1 }}>
+          <Button
+            mode={"contained-tonal"}
+            style={{ maxWidth: 200, marginHorizontal: 48 }}
+            onPress={() => setModalVisible?.(true)}
+          >
+            Trasladar
+          </Button>
+        </View>
       </View>
       <Pressable
         style={styles.closeButton}
@@ -53,6 +68,7 @@ const RepuestoDetail: React.FC<RepuestoDetailProps> = ({
         <DetailItem label="Línea" value={repuesto.linea} />
         <DetailItem label="Marca" value={repuesto.marca} />
         <DetailItem label="Modelo" value={repuesto.modelo} />
+        <DetailItem label="Ubicacion" value={repuesto.ubicacion} />
         <DetailItem
           label="Compatibilidad"
           value={`${repuesto.compatibilidadInicial} - ${repuesto.compatibilidadFinal}`}
@@ -79,8 +95,9 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
     borderRadius: 8,
-    padding: 16,
-    margin: 8,
+    paddingHorizontal: 8,
+    marginHorizontal: 8,
+
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -101,6 +118,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#e0e0e0",
     paddingBottom: 8,
     marginBottom: 16,
+    flex: 1,
   },
   title: {
     fontSize: 18,

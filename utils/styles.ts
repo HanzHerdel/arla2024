@@ -14,4 +14,10 @@ export const globalStyles = StyleSheet.create({
     margin: 8,
     width: "96%",
   },
+  flexBoxRow: {
+    flex: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+  },
 });

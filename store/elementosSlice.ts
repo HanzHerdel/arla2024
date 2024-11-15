@@ -12,6 +12,7 @@ import { generateYearsList } from "@/utils/dates";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { useSelector } from "react-redux";
 import { RootState } from "./store";
+import { Ubicacion } from "@/utils/constants";
 
 export interface ElementosInitialState {
   usuarios: Usuario[];
@@ -23,6 +24,7 @@ export interface ElementosInitialState {
   proveedores: Proveedor[];
   estados: GenericValue[];
   lados: GenericValue[];
+  ubicaciones: GenericValue[];
 }
 
 export const initialState: ElementosInitialState = {
@@ -42,6 +44,13 @@ export const initialState: ElementosInitialState = {
     { id: "LH", nombre: "LH" },
     { id: "RH", nombre: "RH" },
     { id: "TRASERO", nombre: "TRASERO" },
+  ],
+  ubicaciones: [
+    { id: Ubicacion.ventas, nombre: Ubicacion.ventas },
+    { id: Ubicacion.bodega, nombre: Ubicacion.bodega },
+    { id: Ubicacion.caja, nombre: Ubicacion.caja },
+    { id: Ubicacion.despacho, nombre: Ubicacion.despacho },
+    { id: Ubicacion.indefinida, nombre: Ubicacion.indefinida },
   ],
 };
 

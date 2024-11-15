@@ -1,4 +1,11 @@
 import { FieldValue, Timestamp } from "firebase/firestore";
+import {
+  AccionHistorial,
+  EstadoTraslado,
+  RazonHistorial,
+  TipoHistorial,
+  Ubicacion,
+} from "./utils/constants";
 
 export enum EstadoRepuesto {
   nuevo = "nuevo",
@@ -6,7 +13,6 @@ export enum EstadoRepuesto {
 }
 export interface Repuesto {
   id: string;
-  // Agrega aquí otros campos que esperas en tus artículos
   codigo: string;
   compatibilidadFinal: number;
   compatibilidadInicial: number;
@@ -24,13 +30,10 @@ export interface Repuesto {
   existencias: number;
   linea: string;
   marca: string;
+  ubicacion: Ubicacion;
   keyWords?: Array<string>;
   // este es el unico valor apuntando a Ids de momento
   proveedor?: string;
-  /*   categoriaId: string;
-  lineaId?: string;
-  estacionId: string;
-  marcaId: string; */
 }
 
 export interface RepuestoCart extends Repuesto {
@@ -134,4 +137,29 @@ export interface Proveedor {
 export interface GenericValue {
   id: string;
   nombre: string;
+}
+
+export interface Historial {
+  id: string;
+  tipo: TipoHistorial;
+  accion: AccionHistorial;
+  usuario: string;
+  fecha: FieldValue | Timestamp;
+  idRepuesto?: string;
+  ventaId?: string;
+  unidades?: number;
+  razon?: RazonHistorial;
+  notas?: string;
+  changes?: Record<string, any>;
+}
+
+export interface SolicitudDeTraslados {
+  usuarioSolicitud: User;
+  usuarioEnProgreso: User;
+  ubicacion: Ubicacion;
+  destino: Ubicacion;
+  estado: EstadoTraslado;
+  fechaInicio: FieldValue | Timestamp;
+  fechaEnProgreso: FieldValue | Timestamp;
+  fechaEntregado: FieldValue | Timestamp;
 }

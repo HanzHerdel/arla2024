@@ -1,3 +1,4 @@
+import { Ubicacion } from "@/utils/constants";
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
@@ -7,20 +8,28 @@ type GenericSelectProps<T> = {
   onChange: (usuario: T) => void; // Función para actualizar el usuario seleccionado
   selectedField?: string;
   selectLabel?: string;
+  label?: string;
+  defaultValue?: any;
+  disabled?: boolean;
 };
 
 const GenericSelect = <T,>({
   data,
   onChange,
   selectedField = "nombre",
-  selectLabel = "Selecciona un usuario",
+  selectLabel = "Seleccione un usuario",
+  label = "Seleccion:",
+  defaultValue,
+  disabled = false,
 }: GenericSelectProps<T>) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Seleccione un usuario:</Text>
+      <Text style={styles.label}>{label}</Text>
       <SelectDropdown
         data={data}
         onSelect={(selectedItem) => onChange(selectedItem)}
+        defaultValue={defaultValue}
+        disabled={disabled}
         renderButton={(selectedItem) => {
           return (
             <View style={styles.dropdownButton}>

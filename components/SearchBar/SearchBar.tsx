@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { View, TextInput, StyleSheet, Dimensions } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 
-import { db } from "@/configs/firebaseConfig";
-import { getCollectionData } from "@/api/getGenericCollections";
-import { Linea, Marca, Modelo } from "@/types";
+import { useElementos } from "@/store/elementosSlice";
+import { Ubicacion } from "@/utils/constants";
 
 interface SearchFilterProps {
   searchText: string;
@@ -15,6 +14,11 @@ interface SearchFilterProps {
   setCompatibility: (compat: string) => void;
   setSearchText: (name: string) => void;
   setLine: (linea: string) => void;
+  setUbicacion?: (brand: string) => void;
+  ubicacion?: string;
+  setProveedor?: (compat: string) => void;
+  proveedor?: string;
+  fullSearch?: boolean;
 }
 
 const SearchBar: React.FC<SearchFilterProps> = ({
@@ -26,30 +30,53 @@ const SearchBar: React.FC<SearchFilterProps> = ({
   setBrand,
   line,
   setLine,
+  setUbicacion,
+  ubicacion,
+  setProveedor,
+  proveedor,
+  fullSearch = false,
 }) => {
   // Datos de ejemplo para los selectores
-  const [lineas, setLineas] = useState<Linea[]>([]);
 
-  const [marcas, setMarcas] = useState<Marca[]>([]);
-  const [modelos, setModelos] = useState<Modelo[]>([]);
-
-  useEffect(() => {
-    getCollectionData<Linea>(db, "lineas", setLineas);
-
-    getCollectionData<Marca>(db, "marcas", setMarcas);
-
-    getCollectionData<Modelo>(db, "modelos", setModelos, "modelo");
-  }, []);
+  const { marcas, lineas, modelos, ubicaciones, proveedores } = useElementos();
 
   return (
     <View style={styles.container}>
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Búsqueda"
+          placeholder="Nombre Repuesto"
           value={searchText}
           onChangeText={setSearchText}
         />
+        {fullSearch && (
+          <React.Fragment>
+            <Picker
+              selectedValue={ubicacion}
+              onValueChange={(itemValue: any) => setUbicacion?.(itemValue)}
+              style={{ ...styles.picker, flex: 1 }}
+            >
+              <Picker.Item label="Ubicacion" value="" />
+              {ubicaciones.map((option, index) => (
+                <Picker.Item key={index} label={option.id} value={option.id} />
+              ))}
+            </Picker>
+            <Picker
+              selectedValue={proveedor}
+              onValueChange={(itemValue: any) => setProveedor?.(itemValue)}
+              style={{ ...styles.picker, flex: 1 }}
+            >
+              <Picker.Item label="Proveedor" value="" />
+              {proveedores.map((option, index) => (
+                <Picker.Item
+                  key={index}
+                  label={option.nombre}
+                  value={option.id}
+                />
+              ))}
+            </Picker>
+          </React.Fragment>
+        )}
       </View>
 
       <View style={styles.selectorsContainer}>
@@ -108,9 +135,14 @@ const styles = StyleSheet.create({
   container: {
     padding: 10,
     backgroundColor: "#fff",
+    maxHeight: 200,
   },
   searchContainer: {
     marginBottom: 10,
+    flex: 1,
+    flexDirection: "row",
+    gap: 10,
+    flexWrap: "wrap",
   },
   searchInput: {
     height: 40,
@@ -118,11 +150,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
+    minWidth: 400,
+    flexGrow: 1,
   },
   selectorsContainer: {
-    flexDirection: Dimensions.get("window").width > 768 ? "row" : "column",
+    //flexDirection: Dimensions.get("window").width > 768 ? "row" : "column",
+    flexDirection: "row",
     justifyContent: "space-between",
-    gap: 10,
+    flexWrap: "wrap",
+    minWidth: 200,
+    gap: 8,
   },
   pickerContainer: {
     flex: 1,

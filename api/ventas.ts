@@ -7,6 +7,7 @@ import {
   where,
 } from "firebase/firestore";
 import { getQuery } from "./getQuery";
+import { Collections } from "@/utils/constants";
 
 export const getVentas = async <Ventas>(
   db: Firestore,
@@ -15,19 +16,16 @@ export const getVentas = async <Ventas>(
   fechaFin: Date,
   vendedorId?: string
 ): Promise<Ventas[] | null> => {
-  const collectionRef = collection(db, "ventas");
+  const collectionRef = collection(db, Collections.ventas);
 
   const querys = [
     where("fecha", ">=", fechaInicio),
     where("fecha", "<=", fechaFin),
-    ...(vendedorId
-      ? [where("vendedor.id", "==", "W2CTZaBn59SilBgqRqSs5iGzrw82")]
-      : []),
+    ...(vendedorId ? [where("vendedor.id", "==", vendedorId)] : []),
   ];
 
   const ventasQuery = query(collectionRef, ...querys, orderBy("fecha", "asc"));
   const ventas = await getQuery<Ventas>(ventasQuery, "ventas");
-  console.log("ventas: ", ventas);
 
   if (ventas) {
     setValues(ventas);

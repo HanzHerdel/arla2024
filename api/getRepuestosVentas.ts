@@ -1,5 +1,5 @@
 import { Repuesto } from "@/types";
-import { CONECTORES } from "@/utils/constants";
+import { Collections, CONECTORES } from "@/utils/constants";
 import {
   collection,
   Firestore,
@@ -17,7 +17,7 @@ interface GetRepuestosVentas {
   modelo?: string;
   limite?: number;
 }
-export const getRepuestosVentas = async (
+export const getRepuestos = async (
   db: Firestore,
   { marca, linea, nombre, estacion, modelo, limite = 32 }: GetRepuestosVentas
 ): Promise<Repuesto[]> => {
@@ -26,7 +26,7 @@ export const getRepuestosVentas = async (
       .split(" ")
       .filter((word) => !CONECTORES.includes(word));
 
-    const repuestosCollection = collection(db, "repuestos");
+    const repuestosCollection = collection(db, Collections.repuestos);
 
     const queryArray = [];
     marca && queryArray.push(where("marca", "==", marca));
@@ -57,6 +57,7 @@ export const getRepuestosVentas = async (
       id: doc.id,
       ...doc.data(),
     })) as Repuesto[];
+    console.log("fetchedRepuestos: ", fetchedRepuestos);
     return fetchedRepuestos;
   } catch (error) {
     console.error("Error fetching repuestos: ", error);

@@ -1,3 +1,4 @@
+/* import { Collections } from "@/utils/constants";
 import {
   collection,
   Firestore,
@@ -15,7 +16,7 @@ export const getLineas = async (
   setValues?: Function
 ): Promise<Lineas[]> => {
   try {
-    const lineasCollection = collection(db, "lineas");
+    const lineasCollection = collection(db, Collections.lineas);
 
     const repQuery = query(lineasCollection, orderBy("nombre", "asc"));
 
@@ -34,3 +35,4 @@ export const getLineas = async (
     throw new Error("Error fetching lineas"); // Lanzar error para manejo en el llamador
   }
 };
+ */

@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     width: "90%",
     maxHeight: "90%",
-    maxWidth: 500,
+    maxWidth: "90%",
     // Opcional: añadir sombras
     shadowColor: "#000",
     shadowOffset: {

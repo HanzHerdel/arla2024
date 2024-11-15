@@ -22,8 +22,7 @@ import RepuestoDetail from "@/components/Details/Details";
 import { columnsCart, columnsVentas } from "@/components/Table/utils/columns";
 import ButtonGroupAgregar from "@/components/Buttons/ButtonGroupAgregar";
 import useDebounce from "@/hooks/useDebounce";
-import { getRepuestosVentas } from "@/api/getRepuestosVentas";
-import SelectDropdown from "react-native-select-dropdown";
+
 import SearchBar from "@/components/SearchBar/SearchBar";
 import ButtonGroupVender from "@/components/Buttons/ButtonGroupVender";
 import ExpandableFooter from "@/components/Footer/Footer";
@@ -33,6 +32,9 @@ import LongBar from "@/components/LongBar/LongBar";
 import ClientForm from "@/components/ClientForm/ClientForm";
 import ClosableModal from "@/components/ClosableModal/ClosableModal";
 import { useSession } from "@/providers/Session";
+import useRepuestos from "@/hooks/useRepuestosFiltros";
+import TrasladoModal from "@/components/ModalTraslado/ModalTraslado";
+import { Ubicacion } from "@/utils/constants";
 
 type RootStackParamList = {
   Ventas: { ventas?: boolean };
@@ -61,7 +63,7 @@ const VentasScreen: React.FC = ({}) => {
   const [linea, setLineaFilter] = useState<string>("");
   const [marca, setMarcaFilter] = useState<string>("");
   // const [modelo, setModeloFilter] = useState<number>(0);
-  const [searchResults, setSearchResults] = useState<Repuesto[]>([]);
+
   const [shopList, setShopList] = useState<RepuestoCart[]>([]);
   const [clientData, setClientData] = useState<Cliente | null>(null);
   const [repuestoSeleccionado, setrepuestoSeleccionado] =
@@ -72,32 +74,14 @@ const VentasScreen: React.FC = ({}) => {
   const [clientModal, setClientModal] = useState<boolean>(false);
   const [total, setTotal] = useState<number>(0);
 
-  /** Effects */
+  const { repuestos: searchResults } = useRepuestos({
+    marca,
+    linea,
+    nombre: nameQuery.toUpperCase(),
+    modelo,
+  });
 
-  useEffect(() => {
-    performSearch();
-  }, [nameQuery, linea, marca, modelo]);
-
-  /** Search Functions */
-
-  const performSearch = async (): Promise<void> => {
-    const nombre = nameQuery.toUpperCase();
-
-    try {
-      console.log("modelo: ", modelo, typeof modelo);
-      const results = await getRepuestosVentas(db, {
-        marca,
-        linea,
-        nombre,
-        modelo,
-      });
-      setSearchResults(results);
-    } catch (error) {
-      console.error("Search error:", error);
-      console.log("Error", "Error al buscar repuestos");
-    }
-  };
-
+  const [modalTraslado, setModalTrasladoVisible] = useState<boolean>(false);
   /** Shopping Cart Functions */
   const addToCartHandler = (
     _repuesto?: Repuesto | null,
@@ -210,7 +194,7 @@ const VentasScreen: React.FC = ({}) => {
         vendedor: user,
       };
 
-      const result = await proccessSell(db, shopList, ventaData);
+      const result = await proccessSell(db, shopList, ventaData, user!);
       if (result) {
         console.log("Éxito", isCredit ? "Crédito Agregado" : "Venta Realizada");
         setClientData(null);
@@ -245,6 +229,12 @@ const VentasScreen: React.FC = ({}) => {
 
   return (
     <View style={{ flex: 1 }}>
+      <TrasladoModal
+        visible={modalTraslado}
+        onDismiss={() => setModalTrasladoVisible(false)}
+        repuesto={repuestoSeleccionado}
+        ubicacionOrigen={Ubicacion.ventas}
+      />
       <View style={styles.container}>
         {/* Barra de busqueda y tabla de resultados */}
         <SearchBar
@@ -270,12 +260,14 @@ const VentasScreen: React.FC = ({}) => {
             <RepuestoDetail
               repuesto={repuestoSeleccionado}
               onClose={() => setrepuestoSeleccionado(null)}
+              setModalVisible={setModalTrasladoVisible}
             />
             <ButtonGroupAgregar
               onAddPress={addToCartHandler}
               onDiscountPress={() => addToCartHandler(null, ADD.descuento)}
-              onSpecialDiscountPress={() =>
-                addToCartHandler(null, ADD.especial)
+              onSpecialDiscountPress={
+                () => console.log("en contruccion...")
+                // addToCartHandler(null, ADD.especial)
               }
             />
           </View>
