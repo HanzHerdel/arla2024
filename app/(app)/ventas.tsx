@@ -1,20 +1,6 @@
-// VentasScreen.tsx
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  TextInput,
-  Alert,
-  Platform,
-  ListRenderItem,
-  Modal,
-} from "react-native";
-import { RouteProp } from "@react-navigation/native";
-import { FieldValue, serverTimestamp, Timestamp } from "firebase/firestore";
-import { NativeStackNavigationProp } from "react-native-screens/lib/typescript/native-stack/types";
+import React, { useState } from "react";
+import { View, StyleSheet } from "react-native";
+
 import { db } from "@/configs/firebaseConfig";
 import ResponsiveTable from "@/components/Table/Table";
 import { Cliente, RepuestoCart, Repuesto } from "@/types";
@@ -27,7 +13,7 @@ import SearchBar from "@/components/SearchBar/SearchBar";
 import ButtonGroupVender from "@/components/Buttons/ButtonGroupVender";
 import ExpandableFooter from "@/components/Footer/Footer";
 import ClientsFinder from "@/components/ClientsFinder/ClientsFinder";
-import { proccessSell } from "@/api/processSell";
+import { createPedido, processSell } from "@/api/processSell";
 import LongBar from "@/components/LongBar/LongBar";
 import ClientForm from "@/components/ClientForm/ClientForm";
 import ClosableModal from "@/components/ClosableModal/ClosableModal";
@@ -36,11 +22,7 @@ import useRepuestos from "@/hooks/useRepuestosFiltros";
 import TrasladoModal from "@/components/ModalTraslado/ModalTraslado";
 import { Ubicacion } from "@/utils/constants";
 import { SnackbarType, useSnackbar } from "@/providers/Snackbar";
-
-type RootStackParamList = {
-  Ventas: { ventas?: boolean };
-  // Add other screens as needed
-};
+import ButtonGroupPedido from "@/components/Buttons/ButtonGroupPedido";
 
 //////////////////////////////////////////////
 // Constants
@@ -58,7 +40,7 @@ export const ADD = {
 const VentasScreen: React.FC = ({}) => {
   // States
   const [nombre, setNombreFilter] = useState<string>("");
-  const { showSnackbar } = useSnackbar();
+  const { showSnackbar, showError } = useSnackbar();
   const nameQuery = useDebounce(nombre);
   const { user } = useSession();
   const [modelo, setModelo] = useState<string>("");
@@ -174,13 +156,10 @@ const VentasScreen: React.FC = ({}) => {
 
   /** Sales Functions */
 
-  const processSale = async (isCredit: boolean = false): Promise<void> => {
+  const processPedido = async (): Promise<void> => {
     console.log("clientData: ", clientData);
     if (!clientData) {
-      showSnackbar({
-        message: "Debe agregar datos del cliente",
-        type: SnackbarType.error,
-      });
+      showSnackbar("Debe agregar datos del cliente");
       console.log("Error", "Debe agregar datos del cliente");
       return;
     }
@@ -190,36 +169,23 @@ const VentasScreen: React.FC = ({}) => {
       return;
     }
     try {
-      const ventaData = {
-        aCredito: isCredit,
+      const pedioData = {
         total: total,
         nit: clientData?.nit,
         cliente: clientData,
-        vendedor: user,
       };
 
-      const result = await proccessSell(db, shopList, ventaData, user!);
+      const result = await createPedido(db, shopList, pedioData, user!);
       if (result) {
-        console.log("Éxito", isCredit ? "Crédito Agregado" : "Venta Realizada");
-        showSnackbar({
-          message:
-            "Éxito: " + isCredit ? "Crédito Agregado" : "Venta Realizada",
-        });
+        console.log("Éxito Pedido Realizado");
+        showSnackbar("Éxito: Pedido Realizado");
         setClientData(null);
         setShopList([]);
         return;
-      }
-      console.log(
-        "Error",
-        isCredit ? "Crédito No Agregado" : "Venta No Realizada"
-      );
+      } else showError("Error al procesar");
     } catch (error) {
-      showSnackbar({
-        message: "Error al procesar",
-        type: SnackbarType.error,
-      });
-      console.error("Error processing sale:", error);
-      console.log("Error", "Error al procesar la venta");
+      showError("Error al procesar");
+      console.error("Error processing Pedido:", error);
     }
   };
 
@@ -296,9 +262,8 @@ const VentasScreen: React.FC = ({}) => {
               handleSelect={handleSelectItem}
             />
             <LongBar label={"Total:"} text={`Total: Q${total.toFixed(2)}`} />
-            <ButtonGroupVender
-              onSellPress={() => processSale(false)}
-              onCreditPress={() => processSale(true)}
+            <ButtonGroupPedido
+              onSellPress={() => processPedido()}
               onQuotePress={() => {}}
             />
           </View>

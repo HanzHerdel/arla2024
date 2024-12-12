@@ -29,6 +29,7 @@ export interface Repuesto {
   categoria: string;
   estacion: string;
   existencias: number;
+  unidadesEnReserva?: number;
   linea: string;
   marca: string;
   ubicacion?: Ubicacion;
@@ -78,14 +79,21 @@ export interface ItemVenta {
   codigo: string;
 }
 
+export enum VentaEstados {
+  "pendiente" = "pendiente",
+  "cobrado" = "cobrado",
+  "despachado" = "despachado",
+}
 export interface Venta {
   id: string;
   cliente: Cliente;
   vendedor: Usuario;
+  cajero?: Usuario;
+  despacho?: Usuario;
   items: ItemVenta[];
   total: number;
   fecha: FieldValue | Timestamp;
-  atendio: Usuario;
+  estado: VentaEstados;
 }
 
 export interface Usuario {
@@ -143,7 +151,7 @@ export interface Historial {
   id: string;
   tipo: TipoHistorial;
   accion: AccionHistorial;
-  usuario: string;
+  usuario?: string;
   fecha: FieldValue | Timestamp;
   idRepuesto?: string;
   ventaId?: string;
@@ -151,6 +159,8 @@ export interface Historial {
   razon?: RazonHistorial;
   notas?: string;
   changes?: Record<string, any>;
+  vendedor?: string;
+  cajero?: string;
 }
 
 export enum TrasladosType {

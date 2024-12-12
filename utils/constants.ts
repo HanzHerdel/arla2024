@@ -25,6 +25,7 @@ export enum Collections {
   historial = "historial",
   clientes = "clientes",
   solicitudTraslado = "traslados",
+  pedidos = "pedidos",
 }
 
 export enum TipoHistorial {
@@ -72,7 +73,12 @@ export enum EstadoTraslado {
 }
 
 export const PAGES = {
-  ventas: { usuarios: [Ubicacion.ventas], nombre: "ventas", title: "Ventas" },
+  ventas: {
+    usuarios: [Ubicacion.ventas],
+    nombre: "ventas",
+    title: "Sala de Ventas",
+  },
+  caja: { usuarios: [Ubicacion.caja], nombre: "caja", title: "Caja" },
   creditos: { usuarios: [], nombre: "creditos", title: "Creditos" },
   reportes: { usuarios: [], nombre: "reportes", title: "Reporteria" },
   creacion: { usuarios: [], nombre: "creacion", title: "Creacion Elementos" },

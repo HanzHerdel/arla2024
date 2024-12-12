@@ -13,7 +13,6 @@ export enum SnackbarType {
 
 // Interfaz para las opciones del Snackbar
 export interface SnackbarOptions {
-  message?: string;
   type?: SnackbarType;
   duration?: number;
   actionLabel?: string;
@@ -24,24 +23,14 @@ export interface SnackbarOptions {
 
 // Interfaz para el contexto del Snackbar
 interface SnackbarContextType {
-  showSnackbar: ({
-    message,
-    type,
-    duration,
-    actionLabel,
-    onPress,
-    style,
-    textStyle,
-  }: SnackbarOptions) => void;
-  showError: ({
-    message,
-    type,
-    duration,
-    actionLabel,
-    onPress,
-    style,
-    textStyle,
-  }: SnackbarOptions) => void;
+  showSnackbar: (
+    message: string,
+    { type, duration, actionLabel, onPress, style, textStyle }?: SnackbarOptions
+  ) => void;
+  showError: (
+    message: string,
+    { type, duration, actionLabel, onPress, style, textStyle }?: SnackbarOptions
+  ) => void;
   hideSnackbar: () => void;
 }
 
@@ -65,7 +54,7 @@ export const SnackbarProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [visible, setVisible] = useState(false);
   const [message, setMessage] = useState("");
-  const [options, setOptions] = useState<Omit<SnackbarOptions, "message">>({});
+  const [options, setOptions] = useState<SnackbarOptions>({});
 
   // Configuraciones de color por tipo de alerta
   const getColorByType = (type: SnackbarType): string => {
@@ -80,10 +69,7 @@ export const SnackbarProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   // Función para mostrar el Snackbar
-  const showError = ({
-    message = "Error",
-    ...snackOptions
-  }: SnackbarOptions = {}) => {
+  const showError = (message = "Error", snackOptions: SnackbarOptions = {}) => {
     const defaultOptions: SnackbarOptions = {
       type: SnackbarType.error,
       duration: 3000,
@@ -98,10 +84,10 @@ export const SnackbarProvider: React.FC<{ children: ReactNode }> = ({
     setVisible(true);
   };
 
-  const showSnackbar = ({
+  const showSnackbar = (
     message = "Éxito",
-    ...snackOptions
-  }: SnackbarOptions = {}) => {
+    snackOptions: SnackbarOptions = {}
+  ) => {
     const defaultOptions: SnackbarOptions = {
       type: SnackbarType.default,
       duration: 3000,

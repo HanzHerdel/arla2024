@@ -120,10 +120,10 @@ const RepuestoForm: React.FC<RepuestoFormProps> = ({
         user!
       );
       if (newRepuesto) {
-        showSnackbar({ message: "Repuesto agregado" });
+        showSnackbar("Repuesto agregado");
         onSubmit?.();
       } else {
-        showError({ message: "Error al agregar" });
+        showError("Error al agregar");
       }
     }
     if (action === "UPDATE" && repuesto) {
@@ -134,10 +134,10 @@ const RepuestoForm: React.FC<RepuestoFormProps> = ({
         user!
       );
       if (updatedRepuesto) {
-        showSnackbar({ message: "Repuesto Actualizado" });
+        showSnackbar("Repuesto Actualizado");
         onSubmit?.();
       } else {
-        showError({ message: "Error al actualizar" });
+        showError("Error al actualizar");
       }
     }
   };

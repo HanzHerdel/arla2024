@@ -31,7 +31,6 @@ import { PAGES } from "../../utils/constants";
 
 export default function AppLayout() {
   const { user, isLoading } = useSession();
-  console.log("user: ", user?.ubicacion);
 
   const [filteredTraslados, setFilteredTraslados] = useState<Traslados[]>([]);
 
@@ -144,12 +143,25 @@ export default function AppLayout() {
         }}
       >
         <Drawer.Screen
-          name="ventas"
+          name={PAGES.ventas.nombre}
           redirect={needsRedirection(PageKeys.ventas)}
           options={{
             drawerItemStyle: { ...getAccess(PageKeys.ventas) },
-            drawerLabel: "Ventas",
-            title: "Ventas",
+            drawerLabel: PAGES.ventas.title,
+            title: PAGES.ventas.title,
+            swipeEnabled: true,
+            drawerIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="cart" size={size} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name={PAGES.caja.nombre}
+          redirect={needsRedirection(PageKeys.caja)}
+          options={{
+            drawerItemStyle: { ...getAccess(PageKeys.caja) },
+            drawerLabel: PAGES.caja.title,
+            title: PAGES.caja.title,
             swipeEnabled: true,
             drawerIcon: ({ color, size }) => (
               <MaterialCommunityIcons
@@ -161,12 +173,12 @@ export default function AppLayout() {
           }}
         />
         <Drawer.Screen
-          name="creditos"
+          name={PAGES.creditos.nombre}
           redirect={needsRedirection(PageKeys.creditos)}
           options={{
             drawerItemStyle: { ...getAccess(PageKeys.creditos) },
-            drawerLabel: "Creditos",
-            title: "Creditos",
+            drawerLabel: PAGES.creditos.title,
+            title: PAGES.creditos.title,
             swipeEnabled: true,
             drawerIcon: ({ color, size }) => (
               <MaterialCommunityIcons
@@ -178,12 +190,12 @@ export default function AppLayout() {
           }}
         />
         <Drawer.Screen
-          name="reportes"
+          name={PAGES.reportes.nombre}
           redirect={needsRedirection(PageKeys.reportes)}
           options={{
             drawerItemStyle: { ...getAccess(PageKeys.reportes) },
-            drawerLabel: "Reportes",
-            title: "Reportes",
+            drawerLabel: PAGES.reportes.title,
+            title: PAGES.reportes.title,
             swipeEnabled: true,
             drawerIcon: ({ color, size }) => (
               <MaterialCommunityIcons
@@ -195,12 +207,12 @@ export default function AppLayout() {
           }}
         />
         <Drawer.Screen
-          name="creacion"
+          name={PAGES.creacion.nombre}
           redirect={needsRedirection(PageKeys.creacion)}
           options={{
             drawerItemStyle: { ...getAccess(PageKeys.creacion) },
-            drawerLabel: "Creacion",
-            title: "Creacion de Elementos",
+            drawerLabel: PAGES.creacion.title,
+            title: PAGES.creacion.title,
             swipeEnabled: true,
             drawerIcon: ({ color, size }) => (
               <MaterialCommunityIcons
@@ -213,12 +225,12 @@ export default function AppLayout() {
         />
 
         <Drawer.Screen
-          name="inventario"
+          name={PAGES.inventario.nombre}
           redirect={needsRedirection(PageKeys.inventario)}
           options={{
             drawerItemStyle: { ...getAccess(PageKeys.inventario) },
-            drawerLabel: "Inventario y edicion",
-            title: "Edicion de Elementos",
+            drawerLabel: PAGES.inventario.title,
+            title: PAGES.inventario.title,
             swipeEnabled: true,
             drawerIcon: ({ color, size }) => (
               <MaterialCommunityIcons
@@ -230,12 +242,12 @@ export default function AppLayout() {
           }}
         />
         <Drawer.Screen
-          name="bodega"
+          name={PAGES.bodega.nombre}
           redirect={needsRedirection(PageKeys.bodega)}
           options={{
             drawerItemStyle: { ...getAccess(PageKeys.bodega) },
-            drawerLabel: "Bodega",
-            title: "Bodega",
+            drawerLabel: PAGES.bodega.title,
+            title: PAGES.bodega.title,
             swipeEnabled: true,
             drawerIcon: ({ color, size }) => (
               <MaterialCommunityIcons
@@ -247,10 +259,10 @@ export default function AppLayout() {
           }}
         />
         <Drawer.Screen
-          name="traslados"
+          name={PAGES.traslados.nombre}
           options={{
-            drawerLabel: "Traslados",
-            title: "Traslados",
+            drawerLabel: PAGES.traslados.title,
+            title: PAGES.traslados.title,
             swipeEnabled: true,
             drawerIcon: ({ color, size }) => (
               <MaterialCommunityIcons
@@ -262,12 +274,12 @@ export default function AppLayout() {
           }}
         />
         <Drawer.Screen
-          name="bitacora"
+          name={PAGES.bitacora.nombre}
           redirect={needsRedirection(PageKeys.bitacora)}
           options={{
             drawerItemStyle: { ...getAccess(PageKeys.bitacora) },
-            drawerLabel: "BItacora",
-            title: "Bitacora",
+            drawerLabel: PAGES.bitacora.title,
+            title: PAGES.bitacora.title,
             swipeEnabled: true,
             drawerIcon: ({ color, size }) => (
               <MaterialCommunityIcons

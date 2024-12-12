@@ -26,10 +26,10 @@ export const getCollectionData = async <T>(
   try {
     const collectionRef = collection(db, collectionName);
 
-    const repQuery = query(collectionRef, orderBy(orderByProp, "asc"));
+    const queryCollection = query(collectionRef, orderBy(orderByProp, "asc"));
 
     // Obtener los documentos
-    const snapshot = await getDocs(repQuery);
+    const snapshot = await getDocs(queryCollection);
     const fetchedData = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
