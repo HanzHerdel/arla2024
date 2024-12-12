@@ -34,7 +34,12 @@ const InventarioScreen: React.FC = ({}) => {
           onClose={() => setrepSelected(null)}
           visible={!!repSelected}
         >
-          <RepuestoForm repuesto={repSelected} action="UPDATE" fullMode />
+          <RepuestoForm
+            repuesto={repSelected}
+            action="UPDATE"
+            fullMode
+            onSubmit={() => setrepSelected(null)}
+          />
         </ClosableModal>
       </SearchBarRepuestos>
     </View>

@@ -35,6 +35,7 @@ import { useSession } from "@/providers/Session";
 import useRepuestos from "@/hooks/useRepuestosFiltros";
 import TrasladoModal from "@/components/ModalTraslado/ModalTraslado";
 import { Ubicacion } from "@/utils/constants";
+import { SnackbarType, useSnackbar } from "@/providers/Snackbar";
 
 type RootStackParamList = {
   Ventas: { ventas?: boolean };
@@ -57,6 +58,7 @@ export const ADD = {
 const VentasScreen: React.FC = ({}) => {
   // States
   const [nombre, setNombreFilter] = useState<string>("");
+  const { showSnackbar } = useSnackbar();
   const nameQuery = useDebounce(nombre);
   const { user } = useSession();
   const [modelo, setModelo] = useState<string>("");
@@ -175,11 +177,13 @@ const VentasScreen: React.FC = ({}) => {
   const processSale = async (isCredit: boolean = false): Promise<void> => {
     console.log("clientData: ", clientData);
     if (!clientData) {
+      showSnackbar({
+        message: "Debe agregar datos del cliente",
+        type: SnackbarType.error,
+      });
       console.log("Error", "Debe agregar datos del cliente");
       return;
     }
-
-    console.log("clientData: ", clientData);
 
     if (shopList.length < 1) {
       console.log("Error", "Nada que vender");
@@ -197,6 +201,10 @@ const VentasScreen: React.FC = ({}) => {
       const result = await proccessSell(db, shopList, ventaData, user!);
       if (result) {
         console.log("Éxito", isCredit ? "Crédito Agregado" : "Venta Realizada");
+        showSnackbar({
+          message:
+            "Éxito: " + isCredit ? "Crédito Agregado" : "Venta Realizada",
+        });
         setClientData(null);
         setShopList([]);
         return;
@@ -206,6 +214,10 @@ const VentasScreen: React.FC = ({}) => {
         isCredit ? "Crédito No Agregado" : "Venta No Realizada"
       );
     } catch (error) {
+      showSnackbar({
+        message: "Error al procesar",
+        type: SnackbarType.error,
+      });
       console.error("Error processing sale:", error);
       console.log("Error", "Error al procesar la venta");
     }
@@ -217,7 +229,6 @@ const VentasScreen: React.FC = ({}) => {
 
   /** Footer Functions */
   const handleTouchFooter = () => {
-    console.log("qui");
     setShowFooter((p) => !p);
   };
 
@@ -225,9 +236,7 @@ const VentasScreen: React.FC = ({}) => {
     setClientData(cliente);
     setShowFooter(false);
   };
-  console.log("clientData: ", clientData);
 
-  console.log("repuestoSeleccionado: ", repuestoSeleccionado);
   return (
     <View style={{ flex: 1 }}>
       {repuestoSeleccionado && (

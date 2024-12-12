@@ -1,4 +1,3 @@
-import { Ubicacion } from "@/utils/constants";
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";

@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity } from "react-native";
+import { FlexStyle, Text, TouchableOpacity } from "react-native";
 import { Href, Redirect, router } from "expo-router";
 
 import { useSession } from "../../providers/Session";
@@ -16,16 +16,23 @@ import {
   setProveedores,
   setUsuarios,
 } from "@/store/elementosSlice";
-import { Collections, EstadoTraslado } from "@/utils/constants";
+import {
+  Collections,
+  EstadoTraslado,
+  PageKey,
+  PageKeys,
+} from "@/utils/constants";
 import { Unsubscribe } from "firebase/firestore";
 import { setTraslados, useTraslados } from "@/store/trasladosSlice";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AnimatedAlertIcon from "@/components/Icons/AlertIcon";
 import { Traslados } from "@/types";
+import { PAGES } from "../../utils/constants";
 
 export default function AppLayout() {
   const { user, isLoading } = useSession();
   console.log("user: ", user?.ubicacion);
+
   const [filteredTraslados, setFilteredTraslados] = useState<Traslados[]>([]);
 
   const dispatch = useDispatch();
@@ -85,17 +92,39 @@ export default function AppLayout() {
       (t) => t.ubicacion === user.ubicacion
     );
     setFilteredTraslados(trasladosDeUbicacion);
-  }, [traslados]);
+  }, [traslados, user]);
 
   // You can keep the splash screen open, or render a loading screen like we do here.
   if (isLoading) {
-    return <Text>Loading...</Text>;
+    return <Text>Cargando...</Text>;
   }
 
   if (!user) {
     return <Redirect href="/login" />;
   }
-  const [showAlert, setShowAlert] = useState(true);
+
+  const isUserAllowed = (page: PageKey) => {
+    const pageUsersAllowed = PAGES[page]["usuarios"];
+    return pageUsersAllowed.some((userType) => userType === user?.ubicacion);
+  };
+
+  const getAccess = (page: PageKey): FlexStyle => {
+    if (user.superUser) return { display: "flex" };
+    console.log("user: ", user);
+
+    const userIsAllowed = isUserAllowed(page);
+    if (userIsAllowed) {
+      return { display: "flex" };
+    }
+    return { display: "none" };
+  };
+
+  const needsRedirection = (page: PageKey): boolean => {
+    console.log("user.sueprUser: ", user.superUser);
+    if (user.superUser) return false;
+    const needsRedirection = !isUserAllowed(page);
+    return needsRedirection;
+  };
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer
@@ -105,18 +134,10 @@ export default function AppLayout() {
             flex: 1,
           },
           headerRight: () => (
-            /*             <TouchableOpacity
-              onPress={() => { }}
-              style={{ marginRight: 15 }}
-            >
-              <MaterialCommunityIcons name="transfer" size={24} color="black" />
-            </TouchableOpacity> */
             <AnimatedAlertIcon
               hasAlert={!!filteredTraslados.length}
               onPress={() => {
                 router.navigate("/traslados" as Href);
-                // Tu lógica aquí
-                // setShowAlert(false);
               }}
             />
           ),
@@ -124,7 +145,9 @@ export default function AppLayout() {
       >
         <Drawer.Screen
           name="ventas"
+          redirect={needsRedirection(PageKeys.ventas)}
           options={{
+            drawerItemStyle: { ...getAccess(PageKeys.ventas) },
             drawerLabel: "Ventas",
             title: "Ventas",
             swipeEnabled: true,
@@ -139,7 +162,9 @@ export default function AppLayout() {
         />
         <Drawer.Screen
           name="creditos"
+          redirect={needsRedirection(PageKeys.creditos)}
           options={{
+            drawerItemStyle: { ...getAccess(PageKeys.creditos) },
             drawerLabel: "Creditos",
             title: "Creditos",
             swipeEnabled: true,
@@ -154,7 +179,9 @@ export default function AppLayout() {
         />
         <Drawer.Screen
           name="reportes"
+          redirect={needsRedirection(PageKeys.reportes)}
           options={{
+            drawerItemStyle: { ...getAccess(PageKeys.reportes) },
             drawerLabel: "Reportes",
             title: "Reportes",
             swipeEnabled: true,
@@ -169,7 +196,9 @@ export default function AppLayout() {
         />
         <Drawer.Screen
           name="creacion"
+          redirect={needsRedirection(PageKeys.creacion)}
           options={{
+            drawerItemStyle: { ...getAccess(PageKeys.creacion) },
             drawerLabel: "Creacion",
             title: "Creacion de Elementos",
             swipeEnabled: true,
@@ -182,9 +211,12 @@ export default function AppLayout() {
             ),
           }}
         />
+
         <Drawer.Screen
           name="inventario"
+          redirect={needsRedirection(PageKeys.inventario)}
           options={{
+            drawerItemStyle: { ...getAccess(PageKeys.inventario) },
             drawerLabel: "Inventario y edicion",
             title: "Edicion de Elementos",
             swipeEnabled: true,
@@ -199,7 +231,9 @@ export default function AppLayout() {
         />
         <Drawer.Screen
           name="bodega"
+          redirect={needsRedirection(PageKeys.bodega)}
           options={{
+            drawerItemStyle: { ...getAccess(PageKeys.bodega) },
             drawerLabel: "Bodega",
             title: "Bodega",
             swipeEnabled: true,
@@ -229,7 +263,9 @@ export default function AppLayout() {
         />
         <Drawer.Screen
           name="bitacora"
+          redirect={needsRedirection(PageKeys.bitacora)}
           options={{
+            drawerItemStyle: { ...getAccess(PageKeys.bitacora) },
             drawerLabel: "BItacora",
             title: "Bitacora",
             swipeEnabled: true,

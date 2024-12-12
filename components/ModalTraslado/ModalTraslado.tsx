@@ -18,7 +18,7 @@ interface TrasladoModalProps {
   visible: boolean;
   onDismiss: () => void;
   onConfirm?: (data: TrasladoData) => void;
-  repuesto: Repuesto | null;
+  repuesto: Repuesto;
   closeModal: Function;
   ubicacionOrigen?: Ubicacion;
 }
@@ -64,8 +64,9 @@ const TrasladoModal: React.FC<TrasladoModalProps> = ({
     }
     const res = await createTraslado(
       db,
-      ubicacionActual,
-      ubicacionDestino,
+      ubicacionActual.id,
+      ubicacionDestino.id,
+      repuesto!,
       user!
     );
     if (res) {
@@ -120,7 +121,7 @@ const TrasladoModal: React.FC<TrasladoModalProps> = ({
               buttonColor="#2196F3"
               textColor="#FFFFFF"
             >
-              Confirmar Traslado
+              Solicitar Traslado
             </Button>
           </View>
         </Surface>

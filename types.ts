@@ -5,6 +5,7 @@ import {
   RazonHistorial,
   TipoHistorial,
   Ubicacion,
+  UbicacionesKeys,
 } from "./utils/constants";
 
 export enum EstadoRepuesto {
@@ -30,7 +31,12 @@ export interface Repuesto {
   existencias: number;
   linea: string;
   marca: string;
-  ubicacion: Ubicacion;
+  ubicacion?: Ubicacion;
+  [UbicacionesKeys.ventas]: number;
+  [UbicacionesKeys.bodega]: number;
+  [UbicacionesKeys.caja]: number;
+  [UbicacionesKeys.despacho]: number;
+  unidadesEnTraslado?: number;
   keyWords?: Array<string>;
   // este es el unico valor apuntando a Ids de momento
   proveedor?: string;
@@ -84,8 +90,8 @@ export interface Venta {
 
 export interface Usuario {
   id: string;
+  superUser: boolean;
   admin: boolean;
-  sueprUser: boolean;
   nombre: string;
   telefono: string;
   ubicacion?: Ubicacion;
@@ -147,9 +153,31 @@ export interface Historial {
   changes?: Record<string, any>;
 }
 
+export enum TrasladosType {
+  "venta" = "venta",
+  "traslado" = "traslado",
+}
 export interface Traslados {
   id: string;
   usuarioSolicitud: string;
+  idRepuesto: string;
+  usuarioEnProgreso?: string;
+  ubicacion: Ubicacion;
+  destino: Ubicacion;
+  //origen: Ubicacion;
+  estado: EstadoTraslado;
+  ventaId?: string;
+  // unidades: number;
+  fechaInicio: FieldValue | Timestamp;
+  fechaEnProgreso?: FieldValue | Timestamp;
+  fechaEntregado?: FieldValue | Timestamp;
+  tipo: TrasladosType;
+}
+
+export interface TrasladoPedido {
+  id: string;
+  usuarioSolicitud: string;
+  idRepuesto?: string;
   usuarioEnProgreso?: string;
   ubicacion: Ubicacion;
   destino: Ubicacion;

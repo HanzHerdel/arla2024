@@ -6,6 +6,7 @@ import { Icon } from "react-native-elements";
 
 import { Button } from "react-native-paper";
 import { globalStyles } from "@/utils/styles";
+import { Ubicacion } from "@/utils/constants";
 interface RepuestoDetailProps {
   repuesto: Repuesto;
   setModalVisible?: Function;
@@ -68,7 +69,30 @@ const RepuestoDetail: React.FC<RepuestoDetailProps> = ({
         <DetailItem label="Línea" value={repuesto.linea} />
         <DetailItem label="Marca" value={repuesto.marca} />
         <DetailItem label="Modelo" value={repuesto.modelo} />
-        <DetailItem label="Ubicacion" value={repuesto.ubicacion} />
+        {/*         <DetailItem
+          label="Ubicacion"
+          value={repuesto.ubicacion || Ubicacion.indefinida}
+        />
+        <DetailItem
+          label="Bodega"
+          value={repuesto.unidadesBodega || "Sin definir"}
+        />
+        <DetailItem
+          label="Despacho"
+          value={repuesto.unidadesDespacho || "Sin definir"}
+        />
+        <DetailItem
+          label="Caja"
+          value={repuesto.unidadesCaja || "Sin definir"}
+        />
+        <DetailItem
+          label="Sala de Ventas"
+          value={repuesto.unidadesSalaVentas}
+        />
+        <DetailItem
+          label="En Traslado"
+          value={repuesto.unidadesEnTraslado || 0}
+        /> */}
         <DetailItem
           label="Compatibilidad"
           value={`${repuesto.compatibilidadInicial} - ${repuesto.compatibilidadFinal}`}

@@ -21,9 +21,10 @@ import { getKeyWordsFromName } from "@/utils/keywords";
 import { convertRepValuesToNumbers } from "@/api/utils";
 import { createRepuesto, updateRepuesto } from "@/api/repuestos";
 import { Ubicacion } from "@/utils/constants";
+import { useSnackbar } from "../../../providers/Snackbar";
 
 interface RepuestoFormProps {
-  onSubmit?: (formData: Repuesto) => void;
+  onSubmit?: () => void;
   action?: "ADD" | "UPDATE";
   repuesto?: Repuesto | null;
   contentContainerStyle?: object;
@@ -69,6 +70,7 @@ const RepuestoForm: React.FC<RepuestoFormProps> = ({
   } = useForm<New<Repuesto>>({
     defaultValues: repuesto || defaultValues,
   });
+  const { showSnackbar, showError } = useSnackbar();
   const selectedMarcaId = watch("marca");
   const selectedFinalCompat = watch("compatibilidadFinal");
   const selectedInitialCompat = watch("compatibilidadInicial");
@@ -117,6 +119,12 @@ const RepuestoForm: React.FC<RepuestoFormProps> = ({
         convertedData as New<Repuesto>,
         user!
       );
+      if (newRepuesto) {
+        showSnackbar({ message: "Repuesto agregado" });
+        onSubmit?.();
+      } else {
+        showError({ message: "Error al agregar" });
+      }
     }
     if (action === "UPDATE" && repuesto) {
       const updatedRepuesto = await updateRepuesto(
@@ -125,6 +133,12 @@ const RepuestoForm: React.FC<RepuestoFormProps> = ({
         convertedData as Repuesto,
         user!
       );
+      if (updatedRepuesto) {
+        showSnackbar({ message: "Repuesto Actualizado" });
+        onSubmit?.();
+      } else {
+        showError({ message: "Error al actualizar" });
+      }
     }
   };
 
@@ -246,15 +260,6 @@ const RepuestoForm: React.FC<RepuestoFormProps> = ({
             required
           />
 
-          <TextField
-            name="unidadesLimite"
-            label="Unidades limite"
-            control={control}
-            rules={{ required: "El campo Descripción es obligatorio" }}
-            errors={errors}
-            placeholder="Ingrese la cantidad"
-            isNumeric
-          />
           <SelectMultipleModal
             name="lado"
             label="Lado"
@@ -296,6 +301,15 @@ const RepuestoForm: React.FC<RepuestoFormProps> = ({
             items={ubicaciones}
             required
           />
+          <TextField
+            name="unidadesLimite"
+            label="Unidades limite"
+            control={control}
+            rules={{ required: "El campo Descripción es obligatorio" }}
+            errors={errors}
+            placeholder="Ingrese la cantidad"
+            isNumeric
+          />
 
           {fullMode && (
             <React.Fragment>
@@ -314,6 +328,70 @@ const RepuestoForm: React.FC<RepuestoFormProps> = ({
                 placeholder="Ingrese la cantidad"
                 isNumeric
               />
+              {/*               <TextField
+                name="unidadesBodega"
+                label="U. Bodega"
+                control={control}
+                rules={{
+                  required: "El campo es obligatorio",
+                  min: {
+                    value: 0,
+                    message: "Las unidades no pueden ser negativas",
+                  },
+                }}
+                errors={errors}
+                placeholder="Ingrese la cantidad"
+                isNumeric
+              />
+
+              <TextField
+                name="unidadesDespacho"
+                label="U. Despacho"
+                control={control}
+                rules={{
+                  required: "El campo es obligatorio",
+                  min: {
+                    value: 0,
+                    message: "Las unidades no pueden ser negativas",
+                  },
+                }}
+                errors={errors}
+                placeholder="Ingrese la cantidad"
+                isNumeric
+              />
+
+              <TextField
+                name="unidadesCaja"
+                label="U. Caja"
+                control={control}
+                rules={{
+                  required: "El campo es obligatorio",
+                  min: {
+                    value: 0,
+                    message: "Las unidades no pueden ser negativas",
+                  },
+                }}
+                errors={errors}
+                placeholder="Ingrese la cantidad"
+                isNumeric
+              />
+
+              <TextField
+                name="unidadesSalaVentas"
+                label="U. Sala de Ventas"
+                control={control}
+                rules={{
+                  required: "El campo es obligatorio",
+                  min: {
+                    value: 0,
+                    message: "Las unidades no pueden ser negativas",
+                  },
+                }}
+                errors={errors}
+                placeholder="Ingrese la cantidad"
+                isNumeric
+              /> */}
+
               <TextField
                 name="precioDescuento"
                 label="Precio"

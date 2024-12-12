@@ -50,12 +50,16 @@ const getEstadoColor = (estado: EstadoTraslado) => {
 const TrasladoCard = ({ traslado }: { traslado: Traslados }) => {
   const theme = useTheme();
   const { user } = useSession();
+  console.log("user: ", user);
   const { usuarios } = useElementos();
   const pendiente = traslado.estado === EstadoTraslado.pendiente;
   const btnProgresoEnabled =
     pendiente && user?.ubicacion === traslado.ubicacion;
+  console.log("btnProgresoEnabled: ", btnProgresoEnabled);
   const enProgreso = traslado.estado === EstadoTraslado.enProgreso;
+  console.log("enProgreso: ", enProgreso);
   const btnRecibirEnabled = enProgreso && user?.ubicacion === traslado.destino;
+  console.log("btnRecibirEnabled: ", btnRecibirEnabled);
   const getUsuarioNombre = (usuarioId: string) => {
     const usuario = usuarios.find((usr) => usr.id === usuarioId);
     return usuario?.nombre;
@@ -114,7 +118,7 @@ const TrasladoCard = ({ traslado }: { traslado: Traslados }) => {
                   onPress={() =>
                     updateTrasladoStatus(
                       db,
-                      traslado.id,
+                      traslado,
                       EstadoTraslado.enProgreso,
                       user!.id
                     )
@@ -132,7 +136,7 @@ const TrasladoCard = ({ traslado }: { traslado: Traslados }) => {
                   onPress={() =>
                     updateTrasladoStatus(
                       db,
-                      traslado.id,
+                      traslado,
                       EstadoTraslado.entregado,
                       user!.id
                     )

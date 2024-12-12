@@ -11,6 +11,11 @@ export const convertRepValuesToNumbers = (
     "precioDescuento",
     "unidadesLimite",
     "existencias",
+    "unidadesSalaVentas",
+    "unidadesBodega",
+    "unidadesCaja",
+    "unidadesDespacho",
+    "unidadesEnTraslado",
   ];
 
   const convertedData = { ...data };
