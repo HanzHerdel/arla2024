@@ -1,9 +1,8 @@
 import React from "react";
-import { View, TextInput, StyleSheet, Dimensions } from "react-native";
+import { View, TextInput, StyleSheet } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 
 import { useElementos } from "@/store/elementosSlice";
-import { Ubicacion } from "@/utils/constants";
 
 interface SearchFilterProps {
   searchText: string;
@@ -50,7 +49,7 @@ const SearchBar: React.FC<SearchFilterProps> = ({
           onChangeText={setSearchText}
         />
         {fullSearch && (
-          <React.Fragment>
+          <View>
             <Picker
               selectedValue={ubicacion}
               onValueChange={(itemValue: any) => setUbicacion?.(itemValue)}
@@ -75,7 +74,7 @@ const SearchBar: React.FC<SearchFilterProps> = ({
                 />
               ))}
             </Picker>
-          </React.Fragment>
+          </View>
         )}
       </View>
 
