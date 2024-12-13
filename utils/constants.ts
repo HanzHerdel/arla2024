@@ -24,7 +24,7 @@ export enum Collections {
   repuestos = "repuestos",
   historial = "historial",
   clientes = "clientes",
-  solicitudTraslado = "traslados",
+  traslado = "traslados",
   pedidos = "pedidos",
 }
 
@@ -87,7 +87,13 @@ export const PAGES = {
     nombre: "inventario",
     title: "Inventario y Edicion",
   },
+  despacho: {
+    usuarios: [Ubicacion.despacho],
+    nombre: "despacho",
+    title: "Despacho",
+  },
   bodega: { usuarios: [Ubicacion.bodega], nombre: "bodega", title: "Bodega" },
+
   traslados: { usuarios: [], nombre: "traslados", title: "Traslados" },
   bitacora: {
     usuarios: [],
@@ -106,3 +112,5 @@ export const PageKeys: Record<PageKey, PageKey> = Object.keys(PAGES).reduce(
   },
   {} as Record<PageKey, PageKey>
 );
+
+export const SIN_VENTA = "SIN_VENTA";

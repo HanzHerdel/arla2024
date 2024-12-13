@@ -88,11 +88,12 @@ export interface Venta {
   id: string;
   cliente: Cliente;
   vendedor: Usuario;
-  cajero?: Usuario;
-  despacho?: Usuario;
+  cajero?: string;
+  despacho?: string;
   items: ItemVenta[];
   total: number;
   fecha: FieldValue | Timestamp;
+  fechaDespacho?: FieldValue | Timestamp;
   estado: VentaEstados;
 }
 
@@ -169,12 +170,11 @@ export enum TrasladosType {
 }
 export interface Traslados {
   id: string;
-  usuarioSolicitud: string;
-  idRepuesto: string;
-  usuarioEnProgreso?: string;
   ubicacion: Ubicacion;
   destino: Ubicacion;
-  //origen: Ubicacion;
+  usuarioSolicitud: string;
+  idRepuesto?: string;
+  usuarioEnProgreso?: string;
   estado: EstadoTraslado;
   ventaId?: string;
   // unidades: number;
@@ -182,6 +182,7 @@ export interface Traslados {
   fechaEnProgreso?: FieldValue | Timestamp;
   fechaEntregado?: FieldValue | Timestamp;
   tipo: TrasladosType;
+  venta?: Venta;
 }
 
 export interface TrasladoPedido {

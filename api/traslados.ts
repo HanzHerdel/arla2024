@@ -30,12 +30,11 @@ export const createTraslado = async (
   ubicacionSalida: string,
   ubicacionDestino: string,
   repuesto: Repuesto,
-  user: Usuario,
-  tipoTraslado: TrasladosType = TrasladosType.traslado
+  user: Usuario
 ): Promise<Traslados | null> => {
   try {
     // Referencia a la colección
-    const collectionRef = collection(db, Collections.solicitudTraslado);
+    const collectionRef = collection(db, Collections.traslado);
 
     const docRef = doc(collectionRef);
 
@@ -47,7 +46,7 @@ export const createTraslado = async (
       estado: EstadoTraslado.pendiente,
       fechaInicio: timestamp,
       idRepuesto: repuesto.id,
-      tipo: tipoTraslado,
+      tipo: TrasladosType.traslado,
     };
 
     await runTransaction(db, async (transaction) => {
@@ -64,7 +63,7 @@ export const createTraslado = async (
     });
     console.log(
       "elemento creado con exito",
-      Collections.solicitudTraslado,
+      Collections.traslado,
       documentData
     );
     return {
@@ -72,10 +71,7 @@ export const createTraslado = async (
       id: docRef.id,
     } as Traslados;
   } catch (error) {
-    console.error(
-      `Error creating document in ${Collections.solicitudTraslado}:`,
-      error
-    );
+    console.error(`Error creating document in ${Collections.traslado}:`, error);
     return null;
   }
 };
@@ -88,7 +84,7 @@ export const updateTrasladoStatus = async (
 ): Promise<boolean> => {
   try {
     // Referencia al documento específico
-    const docRef = doc(db, Collections.solicitudTraslado, traslado.id);
+    const docRef = doc(db, Collections.traslado, traslado.id);
 
     // Datos a actualizar
     const updateData: Partial<Traslados> = {
@@ -97,41 +93,47 @@ export const updateTrasladoStatus = async (
 
     if (nuevoEstado === EstadoTraslado.enProgreso) {
       await runTransaction(db, async (transaction) => {
-        const historialRef = doc(collection(db, Collections.historial));
         const timestamp = serverTimestamp();
+
+        // Se crean historiales cuando no son ventas
+        if (traslado.tipo !== TrasladosType.venta) {
+          const historialRef = doc(collection(db, Collections.historial));
+          const historialDoc: New<Historial> = {
+            tipo: TipoHistorial.historialProducto,
+            accion: AccionHistorial.trasladoEnProgreso,
+            fecha: timestamp,
+            idRepuesto: traslado.id,
+            usuario: usuarioActualizacion,
+          };
+          transaction.set(historialRef, historialDoc);
+        }
         updateData.fechaEnProgreso = serverTimestamp();
         updateData.usuarioEnProgreso = usuarioActualizacion;
-        const historialDoc: New<Historial> = {
-          tipo: TipoHistorial.historialProducto,
-          accion: AccionHistorial.trasladoEnProgreso,
-          fecha: timestamp,
-          idRepuesto: docRef.id,
-          usuario: usuarioActualizacion,
-        };
-        transaction.set(historialRef, historialDoc);
         transaction.update(docRef, updateData);
       });
     }
     // Si el estado es 'completado' o 'cancelado', agregamos la fecha de finalización
     if (nuevoEstado === EstadoTraslado.entregado) {
       await runTransaction(db, async (transaction) => {
-        const historialRef = doc(collection(db, Collections.historial));
-        const timestamp = serverTimestamp();
-        const historialDoc: New<Historial> = {
-          tipo: TipoHistorial.historialProducto,
-          accion: AccionHistorial.trasladoEntregado,
-          fecha: timestamp,
-          idRepuesto: traslado.idRepuesto,
-          usuario: usuarioActualizacion,
-        };
-        transaction.set(historialRef, historialDoc);
+        if (traslado.tipo !== TrasladosType.venta) {
+          const historialRef = doc(collection(db, Collections.historial));
+          const timestamp = serverTimestamp();
+          const historialDoc: New<Historial> = {
+            tipo: TipoHistorial.historialProducto,
+            accion: AccionHistorial.trasladoEntregado,
+            fecha: timestamp,
+            idRepuesto: traslado.idRepuesto,
+            usuario: usuarioActualizacion,
+          };
+          transaction.set(historialRef, historialDoc);
+        }
         transaction.delete(docRef);
       });
     }
 
     console.log(
       "Estado de traslado actualizado con éxito",
-      Collections.solicitudTraslado,
+      Collections.traslado,
       traslado.id,
       updateData
     );
@@ -139,7 +141,7 @@ export const updateTrasladoStatus = async (
     return true;
   } catch (error) {
     console.error(
-      `Error actualizando estado del traslado ${traslado.id} en ${Collections.solicitudTraslado}:`,
+      `Error actualizando estado del traslado ${traslado.id} en ${Collections.traslado}:`,
       error
     );
     return false;

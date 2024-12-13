@@ -9,16 +9,10 @@ import {
   where,
 } from "firebase/firestore";
 import { VentaEstados } from "@/types";
-import { Collections } from "@/utils/constants";
 
-export enum FiltrosPedidos {
-  "noCobrado",
-  "todos",
-}
-
-export const usePedidosSubscribe = <T>(
+export const useGenericSubscribe = <T>(
   db: Firestore,
-  filtro: FiltrosPedidos = FiltrosPedidos.todos,
+  collectionName: string,
   _limit = 32,
   orderByProp?: string
 ) => {
@@ -27,15 +21,20 @@ export const usePedidosSubscribe = <T>(
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    // Check if db and collectionName are provided
+    if (!db || !collectionName) {
+      setError(new Error("Firestore database or collection name is missing"));
+      setLoading(false);
+      return;
+    }
+
     try {
-      const collectionRef = collection(db, Collections.pedidos);
+      const collectionRef = collection(db, collectionName);
       const queryCol = query(
         ...[
           collectionRef,
           limit(_limit),
-          ...(filtro === FiltrosPedidos.noCobrado
-            ? [where("estado", "!=", VentaEstados.cobrado)]
-            : []),
+          where("estado", "!=", VentaEstados.cobrado),
           ...(orderByProp ? [orderBy(orderByProp)] : []),
         ]
       );
@@ -52,10 +51,7 @@ export const usePedidosSubscribe = <T>(
           setLoading(false);
         },
         (error) => {
-          console.error(
-            `Error fetching data from ${Collections.pedidos}: `,
-            error
-          );
+          console.error(`Error fetching data from ${collectionName}: `, error);
           setError(error);
           setLoading(false);
         }
@@ -65,13 +61,13 @@ export const usePedidosSubscribe = <T>(
       return () => unsubscribe();
     } catch (error) {
       console.error(
-        `Error setting up snapshot listener for ${Collections.pedidos}: `,
+        `Error setting up snapshot listener for ${collectionName}: `,
         error
       );
       setError(error instanceof Error ? error : new Error("Unknown error"));
       setLoading(false);
     }
-  }, [db, orderByProp]);
+  }, [db, collectionName, orderByProp]);
 
   return { data, loading, error };
 };

@@ -1,6 +1,5 @@
-import { Repuesto } from "@/types";
-import { CONECTORES } from "@/utils/constants";
-import { AnyAction, Dispatch, UnknownAction } from "@reduxjs/toolkit";
+import { ReduxAction } from "@/store/store";
+import { Dispatch, UnknownAction } from "@reduxjs/toolkit";
 import {
   collection,
   Firestore,
@@ -11,11 +10,6 @@ import {
   query,
   where,
 } from "firebase/firestore";
-
-interface ReduxAction<T> extends UnknownAction {
-  type: string;
-  payload: T[];
-}
 
 export const getCollectionData = async <T>(
   db: Firestore,

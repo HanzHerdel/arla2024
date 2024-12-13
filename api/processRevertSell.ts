@@ -12,6 +12,7 @@ import {
   serverTimestamp,
   deleteDoc,
   collection,
+  DocumentSnapshot,
 } from "firebase/firestore";
 
 /**
@@ -25,8 +26,9 @@ export const processRevertSell = async (
 ): Promise<boolean> => {
   try {
     const timestamp = serverTimestamp();
+
     await runTransaction(db, async (transaction) => {
-      // Obtener el documento de la venta
+      // Paso 1: Obtener el documento de la venta
       const ventaRef = doc(db, Collections.ventas, ventaId);
       const ventaSnapshot = await transaction.get(ventaRef);
 
@@ -37,7 +39,14 @@ export const processRevertSell = async (
       const ventaData = ventaSnapshot.data();
       const items: ItemVenta[] = ventaData.items;
 
-      // Actualizar existencias de cada producto
+      // Paso 2: Lectura de todos los repuestos
+      const repuestoSnapshots: {
+        id: string;
+        snapshot: DocumentSnapshot;
+        unidades: number;
+      }[] = [];
+
+      // Leer todos los repuestos
       for (const item of items) {
         const repuestoRef = doc(db, Collections.repuestos, item.item);
         const repuestoSnapshot = await transaction.get(repuestoRef);
@@ -46,52 +55,71 @@ export const processRevertSell = async (
           throw new Error(`Repuesto con ID ${item.item} no existe`);
         }
 
-        const existenciasActuales = repuestoSnapshot.data()?.existencias ?? 0;
+        repuestoSnapshots.push({
+          id: item.item,
+          snapshot: repuestoSnapshot,
+          unidades: item.unidades,
+        });
+      }
+
+      // Paso 3: Realizar todas las actualizaciones de repuestos
+      const historialProductoDocs: New<Historial>[] = [];
+      for (const { snapshot, unidades, id } of repuestoSnapshots) {
+        const repuestoRef = doc(db, Collections.repuestos, id);
+        const existenciasActuales = snapshot.data()?.existencias ?? 0;
 
         // Incrementar la cantidad (revertir la venta)
-        const nuevaCantidad = existenciasActuales + item.unidades;
+        const nuevaCantidad = existenciasActuales + unidades;
 
-        // Actualizar el documento del repuesto
         transaction.update(repuestoRef, {
           existencias: nuevaCantidad,
           fechaDeModificacion: timestamp,
         });
-        // creacion historial de repuestos
-        const historialRef = doc(collection(db, Collections.historial));
-        const historialDoc: New<Historial> = {
+
+        // Preparar historial de repuestos
+        historialProductoDocs.push({
           tipo: TipoHistorial.historialProducto,
           accion: AccionHistorial.eliminacion,
           fecha: timestamp,
-          unidades: item.unidades,
-          idRepuesto: item.item,
+          unidades: unidades,
+          idRepuesto: id,
           ventaId: ventaId,
           usuario: user.id,
-        };
-        transaction.set(historialRef, historialDoc);
+        });
       }
-      // agregar entrada a la colleccion ventasDeleted
+
+      // Paso 4: Crear documentos de historial de producto
+      historialProductoDocs.forEach((historialDoc) => {
+        const historialRef = doc(collection(db, Collections.historial));
+        transaction.set(historialRef, historialDoc);
+      });
+
+      // Paso 5: Agregar entrada a la colección ventasDeleted
       const ventaDeletedRef = doc(
-        collection(db, Collections.ventasDeleted, ventaId)
+        collection(db, Collections.ventasDeleted),
+        ventaId
       );
       transaction.set(ventaDeletedRef, {
         ...ventaData,
-        fechaEliminacion: serverTimestamp(),
+        fechaEliminacion: timestamp,
         ventaOriginalId: ventaId,
         eliminadoPor: user,
         userId: user.id,
       });
-      // eliminar venta
+
+      // Paso 6: Eliminar venta original
       transaction.delete(ventaRef);
-      // creacopm historial de ventas
-      const historialRef = doc(collection(db, Collections.historial));
-      const historialDoc: New<Historial> = {
+
+      // Paso 7: Crear historial de ventas
+      const historialVentaRef = doc(collection(db, Collections.historial));
+      const historialVentaDoc: New<Historial> = {
         tipo: TipoHistorial.historialVentas,
         accion: AccionHistorial.eliminacion,
         fecha: timestamp,
         ventaId: ventaId,
         usuario: user.id,
       };
-      transaction.set(historialRef, historialDoc);
+      transaction.set(historialVentaRef, historialVentaDoc);
     });
 
     console.log("Reversión de venta completada correctamente");

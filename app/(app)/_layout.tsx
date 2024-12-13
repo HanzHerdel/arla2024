@@ -28,6 +28,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AnimatedAlertIcon from "@/components/Icons/AlertIcon";
 import { Traslados } from "@/types";
 import { PAGES } from "../../utils/constants";
+import { subscribeTraslados } from "@/api/subscribeTrasladosForRedux";
 
 export default function AppLayout() {
   const { user, isLoading } = useSession();
@@ -53,15 +54,7 @@ export default function AppLayout() {
     unsubs.push(
       subscribeDataForRedux(db, Collections.lineas, setLineas, dispatch)
     );
-    unsubs.push(
-      subscribeDataForRedux(
-        db,
-        Collections.solicitudTraslado,
-        setTraslados,
-        dispatch,
-        "fechaInicio"
-      )
-    );
+    unsubs.push(subscribeTraslados(db, dispatch));
     unsubs.push(
       subscribeDataForRedux(
         db,
@@ -77,20 +70,31 @@ export default function AppLayout() {
   }, []);
 
   const traslados = useTraslados();
-  console.log("traslados: ", traslados);
 
   useEffect(() => {
+    if (!user) return;
+    if (user?.superUser) {
+      setFilteredTraslados(traslados);
+      return;
+    }
     const trasladosPendientes = traslados.filter(
       (t) => t.estado === EstadoTraslado.pendiente
     );
-    if (!user?.ubicacion) {
-      setFilteredTraslados(trasladosPendientes);
-      return;
-    }
-    const trasladosDeUbicacion = trasladosPendientes.filter(
+    const trasladosEnProgreso = traslados.filter(
+      (t) => t.estado === EstadoTraslado.enProgreso
+    );
+
+    const trasladosDesdeUbicacionUrs = trasladosPendientes.filter(
       (t) => t.ubicacion === user.ubicacion
     );
-    setFilteredTraslados(trasladosDeUbicacion);
+
+    const trasladosPorRecebirUsr = trasladosEnProgreso.filter(
+      (t) => t.destino === user.ubicacion
+    );
+    setFilteredTraslados([
+      ...trasladosDesdeUbicacionUrs,
+      ...trasladosPorRecebirUsr,
+    ]);
   }, [traslados, user]);
 
   // You can keep the splash screen open, or render a loading screen like we do here.
@@ -109,7 +113,6 @@ export default function AppLayout() {
 
   const getAccess = (page: PageKey): FlexStyle => {
     if (user.superUser) return { display: "flex" };
-    console.log("user: ", user);
 
     const userIsAllowed = isUserAllowed(page);
     if (userIsAllowed) {
@@ -235,6 +238,23 @@ export default function AppLayout() {
             drawerIcon: ({ color, size }) => (
               <MaterialCommunityIcons
                 name="clipboard-list"
+                size={size}
+                color={color}
+              />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name={PAGES.despacho.nombre}
+          redirect={needsRedirection(PageKeys.despacho)}
+          options={{
+            drawerItemStyle: { ...getAccess(PageKeys.despacho) },
+            drawerLabel: PAGES.despacho.title,
+            title: PAGES.despacho.title,
+            swipeEnabled: true,
+            drawerIcon: ({ color, size }) => (
+              <MaterialCommunityIcons
+                name="package-up"
                 size={size}
                 color={color}
               />
