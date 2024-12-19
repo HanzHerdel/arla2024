@@ -5,7 +5,7 @@ import { FirestoreProvider } from "../providers/Data";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Provider } from "react-redux";
 import store from "@/store/store";
-import { Provider as PaperProvider, Snackbar } from "react-native-paper";
+import { Provider as PaperProvider, DefaultTheme } from "react-native-paper";
 import { useState } from "react";
 import { SnackbarProvider } from "@/providers/Snackbar";
 
@@ -17,7 +17,7 @@ export default function Root() {
       <SessionProvider>
         <FirestoreProvider>
           <Provider store={store}>
-            <PaperProvider>
+            <PaperProvider theme={DefaultTheme}>
               <SnackbarProvider>
                 <Slot />
               </SnackbarProvider>

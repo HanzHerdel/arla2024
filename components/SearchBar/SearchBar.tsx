@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 10,
     backgroundColor: "#fff",
-    maxHeight: 200,
+    //maxHeight: 200,
   },
   searchContainer: {
     marginBottom: 10,

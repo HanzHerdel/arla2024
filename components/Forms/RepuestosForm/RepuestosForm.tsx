@@ -252,12 +252,10 @@ const RepuestoForm: React.FC<RepuestoFormProps> = ({
 
           <TextField
             name="descripcion"
-            label="Descripción"
+            label="Observaciones"
             control={control}
-            rules={{ required: "El campo Descripción es obligatorio" }}
             errors={errors}
-            placeholder="Ingrese la descripción"
-            required
+            placeholder=""
           />
 
           <SelectMultipleModal

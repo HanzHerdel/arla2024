@@ -57,6 +57,17 @@ export enum Ubicacion {
   indefinida = "No Definida",
 }
 
+export const METHODOS_DE_PAGO = {
+  banrural: "Deposito Banrural",
+  bi: "Deposito Bi",
+  efectivo: "Efectivo",
+  posBac: "POS Bac",
+  posVisa: "POS Visa",
+  visaLink: "Visa Link",
+  visaCuotasLink: "Visacuotas Link",
+  visaCuotasPOS: "Visacuotas POS",
+} as const;
+
 export const UbicacionesKeys = {
   ventas: "unidadesSalaVentas",
   bodega: "unidadesBodega",

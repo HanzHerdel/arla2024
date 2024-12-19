@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 import SelectDropdown from "react-native-select-dropdown";
-
+import { Text } from "react-native-paper";
 type GenericSelectProps<T> = {
   data: T[]; // Datos de usuarios
   onChange: (usuario: T) => void; // Función para actualizar el usuario seleccionado
@@ -40,7 +40,7 @@ const GenericSelect = <T,>({
         }}
         renderItem={(item, index) => (
           <TouchableOpacity style={styles.dropdownItem}>
-            <Text style={styles.dropdownItemText}>{item.nombre}</Text>
+            <Text style={styles.dropdownItemText}>{item[selectedField]}</Text>
           </TouchableOpacity>
         )}
       />

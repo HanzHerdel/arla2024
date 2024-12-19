@@ -28,8 +28,10 @@ const HistorialScreen: React.FC = () => {
 
   return (
     <ScrollView>
-      Muestra los movimientos de Repuestos Filtros Tipo historial Filtro Fechas
-      construccion...
+      <Text>
+        Muestra los movimientos de Repuestos Filtros Tipo historial Filtro
+        Fechas construccion...
+      </Text>
       <View style={styles.container}>
         {historialData.map((item, index) => (
           <Card key={index} style={styles.card}>

@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 
 import { db } from "@/configs/firebaseConfig";
-import { Venta } from "@/types";
+import { MetodosDePagoType, Venta } from "@/types";
 
 import { processSell } from "@/api/processSell";
 import { useSession } from "@/providers/Session";
@@ -17,6 +17,8 @@ import { Timestamp } from "firebase/firestore";
 import { ScrollView } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import VentaData from "@/components/VentaData/VentaData";
+import ModalMethodoPago from "@/components/Ventas/ModalMethodoPago";
+import { MethodoDePago } from "../../types";
 //////////////////////////////////////////////
 // Constants
 //////////////////////////////////////////////
@@ -37,7 +39,8 @@ const CajaScreen: React.FC = ({}) => {
     db,
     FiltrosPedidos.noCobrado
   );
-
+  const [modalMetodoPago, setModalMetodoPago] = useState(false);
+  const [ventaSelected, setVentaSelected] = useState<Venta | null>(null);
   /** Sales Functions */
   const processSale = async (
     venta: Venta,
@@ -78,8 +81,30 @@ const CajaScreen: React.FC = ({}) => {
     }
   };
 
+  const handleShowModalPagos = (venta: Venta, credito = false) => {
+    setVentaSelected(venta);
+    setModalMetodoPago(true);
+  };
+
+  const handleHideModalPagos = () => {
+    setVentaSelected(null);
+    setModalMetodoPago(false);
+  };
+  const handleConfirmPagos = (venta: Venta, metodosPago: MethodoDePago) => {
+    const newVenta = { ...venta, metodosPago };
+    handleHideModalPagos();
+    processSale(newVenta);
+  };
   return (
     <View style={{ flex: 1 }}>
+      {ventaSelected && (
+        <ModalMethodoPago
+          venta={ventaSelected}
+          visible={modalMetodoPago}
+          onDismiss={handleHideModalPagos}
+          onConfirm={handleConfirmPagos}
+        />
+      )}
       <ScrollView>
         {pedidos.map((venta, index) => (
           <Card key={index} style={{ margin: 10 }}>
@@ -90,7 +115,6 @@ const CajaScreen: React.FC = ({}) => {
               </Text>
               {/* Items */}
               <VentaData venta={venta} />
-
               {/* Fecha y Vendedor en la misma línea */}
               <View
                 style={{
@@ -115,7 +139,7 @@ const CajaScreen: React.FC = ({}) => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => processSale(venta)}
+                onPress={() => handleShowModalPagos(venta)}
               >
                 <Icon name="attach-money" size={16} color="white" />
                 <Text>Realizar Venta</Text>

@@ -59,7 +59,7 @@ const DespachoScreen: React.FC = ({}) => {
       return;
     }
     try {
-      const result = await finalizarVenta(db, venta, user!);
+      const result = await finalizarVenta(db, venta.id, user!);
 
       if (result) {
         if (result === SIN_VENTA) {

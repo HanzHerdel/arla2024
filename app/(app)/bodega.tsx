@@ -4,7 +4,6 @@ import { View, StyleSheet } from "react-native";
 import ResponsiveTable from "@/components/Table/Table";
 import { Repuesto } from "@/types";
 import { columnsVentas } from "@/components/Table/utils/columns";
-import ClosableModal from "@/components/ClosableModal/ClosableModal";
 import RepuestoForm from "@/components/Forms/RepuestosForm/RepuestosForm";
 import SearchBarRepuestos from "@/components/SearchRepuestosBar/SearchRepuestosBar";
 import RepuestoDetail from "@/components/Details/Details";

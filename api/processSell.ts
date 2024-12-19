@@ -36,11 +36,15 @@ import {
 export const processSell = async (
   db: Firestore,
   pedido: Venta,
-  usuario: Usuario
+  usuario: Usuario,
+  aCredito = false
 ): Promise<boolean> => {
   try {
     const timestamp = serverTimestamp();
-    const ventaData = { ...pedido };
+    const ventaData = {
+      ...pedido,
+      ...(aCredito ? { creditoActivo: true, aCredito } : {}),
+    };
 
     await runTransaction(db, async (transaction) => {
       // Paso 1: Lectura de todos los repuestos
@@ -261,7 +265,7 @@ export const createPedido = async (
 
 export const finalizarVenta = async (
   db: Firestore,
-  venta: Venta,
+  ventaId: string,
   usuario: Usuario
 ): Promise<boolean | string> => {
   try {
@@ -270,7 +274,7 @@ export const finalizarVenta = async (
     const sinVenta = await runTransaction(db, async (transaction) => {
       // actualizar documento de venta a despachado y usuario despacho
       const ventasCollectionRef = collection(db, Collections.ventas);
-      const ventaRef = doc(ventasCollectionRef, venta.id);
+      const ventaRef = doc(ventasCollectionRef, ventaId);
       const _venta = await transaction.get(ventaRef);
       console.log("_venta: ", _venta.data(), _venta.exists());
 
@@ -286,7 +290,7 @@ export const finalizarVenta = async (
       transaction.update(ventaRef, updateVenta);
       // eliminar pedido
       const pedidosCollectionRef = collection(db, Collections.pedidos);
-      const pedidoExistente = doc(pedidosCollectionRef, venta.id);
+      const pedidoExistente = doc(pedidosCollectionRef, ventaId);
       transaction.delete(pedidoExistente);
     });
     // la transaccion solo retorna valor cuando no existe la venta, de lo contrario se considera que fue exitosa y se retorna true

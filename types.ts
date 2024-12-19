@@ -2,6 +2,7 @@ import { FieldValue, Timestamp } from "firebase/firestore";
 import {
   AccionHistorial,
   EstadoTraslado,
+  METHODOS_DE_PAGO,
   RazonHistorial,
   TipoHistorial,
   Ubicacion,
@@ -95,6 +96,16 @@ export interface Venta {
   fecha: FieldValue | Timestamp;
   fechaDespacho?: FieldValue | Timestamp;
   estado: VentaEstados;
+  metodosPago: MethodoDePago;
+  contabilizado: boolean;
+  aCredito: boolean;
+  creditoActivo: boolean;
+}
+
+export interface Abono {
+  ventaId: string;
+  cajero: string;
+  valor: number;
 }
 
 export interface Usuario {
@@ -106,6 +117,11 @@ export interface Usuario {
   ubicacion?: Ubicacion;
 }
 
+// Metodos de pago
+export type MetodoDePagoKey = keyof typeof METHODOS_DE_PAGO;
+export type MetodoDePagoValue = (typeof METHODOS_DE_PAGO)[MetodoDePagoKey];
+export type MetodosDePagoType = Record<MetodoDePagoKey, MetodoDePagoValue>;
+export type MethodoDePago = Record<MetodoDePagoKey, number>;
 export interface Estacion {
   id: string;
   nombre: string;
