@@ -1,5 +1,6 @@
 # To make a build and deploy
 npx expo export -p web
+firebase deploy --only hosting
 
 ## Get started
 

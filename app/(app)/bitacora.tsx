@@ -4,27 +4,54 @@ import { Card, Text } from "react-native-paper";
 import { Timestamp } from "firebase/firestore";
 import { getCollectionData } from "@/api/getGenericCollections";
 import { db } from "@/configs/firebaseConfig";
-import { Collections } from "@/utils/constants";
+import { AccionHistorial, Collections, TipoHistorial } from "@/utils/constants";
 import { getRepuestos } from "../../api/getRepuestosVentas";
+import { useElemento } from "@/store/elementosSlice";
 
 export interface Historial {
-  tipo: string;
-  accion: string;
+  tipo: number;
+  accion: number;
   usuario: string;
   fecha: Timestamp;
   idRepuesto?: string;
   ventaId?: string;
   unidades?: number;
-  razon?: string; // Asumí que es un string para este ejemplo
+  razon?: string;
   notas?: string;
   changes?: Record<string, string>;
 }
 
 const HistorialScreen: React.FC = () => {
+  const usuarios = useElemento("usuarios");
   const [historialData, setHistorialData] = useState<Historial[]>([]);
+
   useEffect(() => {
     getCollectionData(db, Collections.historial, setHistorialData, "fecha");
   }, []);
+
+  // Función para obtener el nombre del tipo de historial
+  const getTipoHistorialNombre = (tipo: number): string => {
+    return (
+      Object.keys(TipoHistorial).find(
+        (key) => TipoHistorial[key as keyof typeof TipoHistorial] === tipo
+      ) || "Desconocido"
+    );
+  };
+
+  // Función para obtener el nombre de la acción
+  const getAccionHistorialNombre = (accion: number): string => {
+    return (
+      Object.keys(AccionHistorial).find(
+        (key) => AccionHistorial[key as keyof typeof AccionHistorial] === accion
+      ) || "Desconocido"
+    );
+  };
+
+  // Función para obtener el nombre del usuario
+  const getNombreUsuario = (userId: string): string => {
+    const usuario = usuarios.find((u: any) => u.id === userId);
+    return usuario ? usuario.nombre : userId;
+  };
 
   return (
     <ScrollView>
@@ -37,13 +64,16 @@ const HistorialScreen: React.FC = () => {
           <Card key={index} style={styles.card}>
             <Card.Content style={styles.cardContent}>
               <Text style={styles.text}>
-                <Text style={styles.bold}>Tipo:</Text> {item.tipo}
+                <Text style={styles.bold}>Tipo:</Text>{" "}
+                {getTipoHistorialNombre(item.tipo)}
               </Text>
               <Text style={styles.text}>
-                <Text style={styles.bold}>Acción:</Text> {item.accion}
+                <Text style={styles.bold}>Acción:</Text>{" "}
+                {getAccionHistorialNombre(item.accion)}
               </Text>
               <Text style={styles.text}>
-                <Text style={styles.bold}>Usuario:</Text> {item.usuario}
+                <Text style={styles.bold}>Usuario:</Text>{" "}
+                {getNombreUsuario(item.usuario)}
               </Text>
               <Text style={styles.text}>
                 <Text style={styles.bold}>Fecha:</Text>{" "}
