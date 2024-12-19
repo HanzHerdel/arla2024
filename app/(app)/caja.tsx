@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 
 import { db } from "@/configs/firebaseConfig";
-import { MetodosDePagoType, Venta } from "@/types";
+import { MetodosDePagoType, TiposVentaUsuario, Venta } from "@/types";
 
 import { processSell } from "@/api/processSell";
 import { useSession } from "@/providers/Session";
@@ -124,7 +124,7 @@ const CajaScreen: React.FC = ({}) => {
                 }}
               >
                 <Text variant="bodyMedium">
-                  Atendió: {venta.vendedor.nombre} | Fecha:{" "}
+                  Atendió: {venta[TiposVentaUsuario.vendedor].nombre} | Fecha:{" "}
                   {getDateString(venta.fecha as Timestamp)}
                 </Text>
               </View>

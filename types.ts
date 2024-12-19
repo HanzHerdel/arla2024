@@ -85,12 +85,23 @@ export enum VentaEstados {
   "cobrado" = "cobrado",
   "despachado" = "despachado",
 }
+
+export enum TiposVentaUsuario {
+  "vendedor" = "vendedor",
+  "despacho" = "despacho",
+  "cajero" = "cajero",
+}
+
+export const TIPOS_DE_USUARIO_VENTA = Object.values(TiposVentaUsuario).filter(
+  (value) => typeof value === "string"
+);
 export interface Venta {
   id: string;
   cliente: Cliente;
-  vendedor: Usuario;
-  cajero?: string;
-  despacho?: string;
+  // TODO: convertir a string vendedor
+  [TiposVentaUsuario.vendedor]: Usuario;
+  [TiposVentaUsuario.cajero]?: string;
+  [TiposVentaUsuario.despacho]?: string;
   items: ItemVenta[];
   total: number;
   fecha: FieldValue | Timestamp;

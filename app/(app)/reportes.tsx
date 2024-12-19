@@ -6,7 +6,12 @@ import DatePickerComponent, {
 } from "@/components/DatePickers/RangePickers";
 import GenericSelect from "@/components/Select/SelectGeneric";
 import { db } from "@/configs/firebaseConfig";
-import { Usuario, Venta } from "@/types";
+import {
+  TIPOS_DE_USUARIO_VENTA,
+  TiposVentaUsuario,
+  Usuario,
+  Venta,
+} from "@/types";
 import { getDateString } from "@/utils/dates";
 import { globalStyles } from "@/utils/styles";
 import { Timestamp } from "firebase/firestore";
@@ -14,6 +19,8 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { useSession } from "../../providers/Session";
+import { useElemento, useElementos } from "@/store/elementosSlice";
+import { Surface } from "react-native-paper";
 
 const Reporte: React.FC = () => {
   /** estados del datePicker */
@@ -23,8 +30,10 @@ const Reporte: React.FC = () => {
     hours: 0,
     minutes: 0,
   });
+
+  const usuarios = useElemento("usuarios");
+
   const { user } = useSession();
-  const [usuarios, setusuarios] = useState<Usuario[]>([]);
 
   const [horaFin, setHorasFin] = useState<TiempoPicker>({
     hours: 23,
@@ -34,6 +43,9 @@ const Reporte: React.FC = () => {
   /** Fin estados del picker */
   const [ventas, setVentas] = useState<Venta[] | null>(null);
   const [selectedUser, setselectedUser] = useState<Usuario | null>(null);
+  const [typoUsuarioFiltro, settypoUsuarioFiltro] = useState<TiposVentaUsuario>(
+    TiposVentaUsuario.vendedor
+  );
 
   const handleSelectUser = (user: Usuario | null) => {
     setselectedUser(user);
@@ -50,12 +62,22 @@ const Reporte: React.FC = () => {
   };
   useEffect(() => {
     const { dateTimeInicio, dateTimeFin } = obtenerFechas();
-    getVentas(db, setVentas, dateTimeInicio, dateTimeFin, selectedUser?.id);
-  }, [fechaFin, fechaFin, horaInicio, horaFin, selectedUser]);
-
-  useEffect(() => {
-    getUsuarios(db, setusuarios);
-  }, []);
+    getVentas(
+      db,
+      setVentas,
+      dateTimeInicio,
+      dateTimeFin,
+      typoUsuarioFiltro,
+      selectedUser?.id
+    );
+  }, [
+    fechaFin,
+    fechaFin,
+    horaInicio,
+    horaFin,
+    selectedUser,
+    typoUsuarioFiltro,
+  ]);
 
   const onEliminarVenta = async (venta: Venta) => {
     if (!user) {
@@ -65,7 +87,14 @@ const Reporte: React.FC = () => {
     const success = await processRevertSell(db, venta.id, user);
     if (success) {
       const { dateTimeInicio, dateTimeFin } = obtenerFechas();
-      getVentas(db, setVentas, dateTimeInicio, dateTimeFin, selectedUser?.id);
+      getVentas(
+        db,
+        setVentas,
+        dateTimeInicio,
+        dateTimeFin,
+        TiposVentaUsuario.cajero,
+        selectedUser?.id
+      );
     }
   };
 
@@ -108,7 +137,7 @@ const Reporte: React.FC = () => {
         <View style={styles.row}>
           <Text style={styles.rowInfoCliente}>
             <Text style={styles.label}>Vendedor:</Text>{" "}
-            {item.vendedor?.nombre || "NA"}
+            {item[TiposVentaUsuario.vendedor]?.nombre || "NA"}
             <Text style={styles.label}> Fecha:</Text>{" "}
             {getDateString(item.fecha as Timestamp)}
           </Text>
@@ -135,13 +164,22 @@ const Reporte: React.FC = () => {
     );
   };
 
+  console.log(TIPOS_DE_USUARIO_VENTA);
   return (
     <View style={{ flex: 1 }}>
       <View>
-        <GenericSelect<Usuario>
-          data={usuarios}
-          onChange={(e) => handleSelectUser(e)}
-        />
+        <Surface style={globalStyles.flexBoxRow}>
+          <GenericSelect<TiposVentaUsuario>
+            data={TIPOS_DE_USUARIO_VENTA}
+            onChange={(e) => settypoUsuarioFiltro(e)}
+            label="Seleccione el tipo de usuario"
+            stringArray
+          />
+          <GenericSelect<Usuario>
+            data={usuarios}
+            onChange={(e) => handleSelectUser(e)}
+          />
+        </Surface>
         <DatePickerComponent
           fechaInicio={fechaInicio}
           setFechaInicio={setFechaInicio}

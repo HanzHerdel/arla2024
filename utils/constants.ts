@@ -1,3 +1,5 @@
+import { TiposVentaUsuario } from "@/types";
+
 export const CONECTORES = [
   "",
   "DE",

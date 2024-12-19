@@ -50,10 +50,7 @@ export const loginWithFirebase = async (
       password
     );
     const user = userCredential.user;
-    console.log("userCredential: ", userCredential);
-    console.log("User signed in:", user);
     const usuario = getUsuarioById(db, user.uid);
-    console.log("usuario: ", usuario);
     return usuario;
     // Manejo del inicio de sesión exitoso
   } catch (error: any) {
@@ -83,7 +80,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
         const mainPage = "ventas";
         const page = "/" + (!route || route === "login" ? mainPage : route);
         setUser(usuario);
-        router.replace(page as Href<string>);
+        router.replace(page as Href);
       }
 
       // Si hay un usuario, se establece, si no, es null

@@ -10,6 +10,7 @@ type GenericSelectProps<T> = {
   label?: string;
   defaultValue?: any;
   disabled?: boolean;
+  stringArray?: boolean;
 };
 
 const GenericSelect = <T,>({
@@ -20,6 +21,7 @@ const GenericSelect = <T,>({
   label = "Seleccion:",
   defaultValue,
   disabled = false,
+  stringArray = false,
 }: GenericSelectProps<T>) => {
   return (
     <View style={styles.container}>
@@ -33,14 +35,20 @@ const GenericSelect = <T,>({
           return (
             <View style={styles.dropdownButton}>
               <Text style={styles.dropdownButtonText}>
-                {selectedItem ? selectedItem[selectedField] : selectLabel}
+                {selectedItem
+                  ? stringArray
+                    ? selectedItem
+                    : selectedItem[selectedField]
+                  : selectLabel}
               </Text>
             </View>
           );
         }}
         renderItem={(item, index) => (
           <TouchableOpacity style={styles.dropdownItem}>
-            <Text style={styles.dropdownItemText}>{item[selectedField]}</Text>
+            <Text style={styles.dropdownItemText}>
+              {stringArray ? item : item[selectedField]}
+            </Text>
           </TouchableOpacity>
         )}
       />
